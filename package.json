@@ -1,0 +1,58 @@
+{
+  "name": "codison",
+  "productName": "codison",
+  "version": "1.0.0",
+  "description": "codison",
+  "main": ".webpack/main",
+  "keywords": [],
+  "author": {
+    "name": "Maksim Smagin",
+    "email": "maksspaceworld@gmail.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "ts-node -r tsconfig-paths/register ./src/index.ts",
+    "lint": "eslint ./src/**/*.{ts,tsx}",
+    "format": "prettier --write ./src/**/*.{ts,tsx,css} --config ./.prettierrc.json"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "@vercel/webpack-asset-relocator-loader": "1.7.3",
+    "conventional-changelog-cli": "^5.0.0",
+    "env-cmd": "10.1.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-import-resolver-typescript": "3.6.1",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-prettier": "5.2.1",
+    "eslint-plugin-react": "7.35.0",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "node-loader": "2.0.0",
+    "prettier": "3.3.3",
+    "prettier-plugin-tailwindcss": "0.6.6",
+    "ts-loader": "9.5.1",
+    "ts-node": "10.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "5.5.4"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/core": "^0.3.66",
+    "@langchain/langgraph": "^0.3.7",
+    "@langchain/openai": "^0.5.18",
+    "@mozilla/readability": "^0.6.0",
+    "@types/jsdom": "^21.1.7",
+    "axios": "1.7.7",
+    "chromium": "^3.0.3",
+    "date-fns": "3.6.0",
+    "dotenv": "^17.2.1",
+    "jsdom": "^26.1.0",
+    "openai": "^5.10.2",
+    "pino": "9.3.2",
+    "playwright": "^1.54.1",
+    "rxjs": "7.8.1",
+    "uuid": "^11.1.0"
+  }
+}
