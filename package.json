@@ -12,6 +12,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node -r tsconfig-paths/register ./src/index.ts",
+    "build": "tsc",
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "format": "prettier --write ./src/**/*.{ts,tsx,css} --config ./.prettierrc.json"
   },
@@ -38,6 +39,7 @@
     "typescript": "5.5.4"
   },
   "dependencies": {
+    "@google/genai": "^1.12.0",
     "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^0.3.66",
     "@langchain/langgraph": "^0.3.7",

@@ -95,8 +95,8 @@ export class OpenAIProvider implements Provider {
               logger.info('OPENAI EVENt', event);
 
               switch (event.type) {
-                case 'response.output_item.added':
-                  logger.info('reading_response');
+                case 'response.created':
+                  observer.next({ type: 'start', id: event.response.id });
                   break;
                 case 'response.output_text.delta':
                   observer.next({ type: 'text', content: event.delta });

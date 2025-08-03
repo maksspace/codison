@@ -74,22 +74,12 @@ export class GeminiProvider implements Provider {
     return false;
   }
 
-  async generate(
-    messages: BaseMessage[],
-    options?: {
-      callbacks?: BaseCallbackHandler[];
-      previousResponseId?: string;
-    },
-  ) {
-    const callbacks = options?.callbacks || [];
-    const runId: string = 'custom-gemini-run-' + Date.now();
-    const parentRunId: string | undefined = undefined;
-
+  async generate(options: StreamOptions) {
     try {
       const geminiContents: { role: string; parts: Part[] }[] = [];
 
       geminiContents.push({
-        role: 'model',
+        role: 'system',
         parts: [{ text: SYSTEM_PROMPT.template }],
       });
 

@@ -1,5 +1,10 @@
 import { Observable } from 'rxjs';
 
+export interface StartEvent {
+  type: 'start';
+  id: string;
+}
+
 export interface TextEvent {
   type: 'text';
   content: string;
@@ -17,7 +22,11 @@ export interface ToolCallEvent {
   callId: string;
 }
 
-export type ProviderEvent = TextEvent | FullTextEvent | ToolCallEvent;
+export type ProviderEvent =
+  | StartEvent
+  | TextEvent
+  | FullTextEvent
+  | ToolCallEvent;
 
 export interface UserMessage {
   role: 'user';

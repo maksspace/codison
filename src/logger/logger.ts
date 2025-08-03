@@ -1,5 +1,5 @@
 class Logger {
-  private debug = true;
+  private debug = false;
 
   info(...msg: unknown[]) {
     if (!this.debug) {
