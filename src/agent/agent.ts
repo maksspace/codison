@@ -110,7 +110,7 @@ export class Agent {
           }),
         );
 
-        await step();
+        await step(); // this bugs Gemini because it messes the user-model flow on 2nd user input
       };
 
       step().catch((err) => {
