@@ -10,6 +10,7 @@ import { Channel } from '@/channel/channel';
 import { ConsoleOutputHandler } from '@/output/console';
 import { availableTools } from '@/tools';
 import { logger } from '@/logger';
+import { GeminiProvider } from './provider/gemini';
 
 async function main() {
   logger.info('Starting AI Agent Interactive CLI...\n');
@@ -17,7 +18,8 @@ async function main() {
     "Type your questions below. Type 'exit' or 'quit' to end the session.",
   );
 
-  const provider = new OpenAIProvider();
+  // const provider = new OpenAIProvider();
+  const provider = new GeminiProvider();
   const history = new History();
   const agent = new Agent({ provider, history, tools: availableTools });
   const channel = new Channel(agent);

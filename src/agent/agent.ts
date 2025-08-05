@@ -84,13 +84,14 @@ export class Agent {
             });
             this.history.addMessage({
               type: 'toolCallOutput',
+              name: call.name,
               callId: call.callId,
               output: result,
             });
           }),
         );
 
-        await step();
+        await step(); // this bugs Gemini because it messes the user-model flow on 2nd user input
       };
 
       step().catch((err) => {
