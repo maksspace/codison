@@ -20,9 +20,19 @@ export class OpenAIProvider implements Provider {
   private openai: OpenAI;
   private tools: FunctionTool[];
 
+<<<<<<< HEAD
   constructor(options: CreateOpenAIProviderOptions) {
     this.openai = new OpenAI({ apiKey: options.apiKey });
     this.tools = options.tools?.map((tool) => ({
+=======
+  constructor() {
+    if (!process.env.OPENAI_API_KEY) {
+      console.log('OPENAI_API_KEY environment variable is not set.');
+    }
+
+    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    this.tools = availableTools.map((tool) => ({
+>>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
       type: 'function',
       name: tool.name,
       description: tool.description,
@@ -58,8 +68,15 @@ export class OpenAIProvider implements Provider {
       );
 
       const stream = await this.openai.responses.create({
+<<<<<<< HEAD
         model: 'gpt-4.1-mini',
         instructions: !options.previousResponseId ? SYSTEM_PROMPT : undefined,
+=======
+        model: MODEL_NAME,
+        instructions: !options.previousResponseId
+          ? SYSTEM_PROMPT.template
+          : undefined,
+>>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
         previous_response_id: options.previousResponseId,
         input,
         tools: this.tools,

@@ -1,8 +1,11 @@
+<<<<<<< HEAD
 export interface AgentStartTextEvent {
   type: 'startText';
   id: string;
 }
 
+=======
+>>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
 export interface AgentPartialTextEvent {
   type: 'partialText';
   content: string;
@@ -56,7 +59,10 @@ export interface AgentDoneEvent {
 }
 
 export type AgentEvent =
+<<<<<<< HEAD
   | AgentStartTextEvent
+=======
+>>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
   | AgentPartialTextEvent
   | AgentFullTextEvent
   | AgentEndTextEvent

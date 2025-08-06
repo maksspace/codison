@@ -1,7 +1,11 @@
 import { Observable } from 'rxjs';
 
 export interface StartTextEvent {
+<<<<<<< HEAD
   type: 'startText';
+=======
+  type: 'start';
+>>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
   id: string;
 }
 
@@ -22,7 +26,11 @@ export interface EndTextEvent {
 
 export interface StartToolEvent {
   type: 'startTool';
+<<<<<<< HEAD
   callId: string;
+=======
+  name: string;
+>>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
 }
 
 export interface BeginToolCall {
