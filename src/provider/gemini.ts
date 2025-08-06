@@ -1,4 +1,9 @@
-import { Content, FunctionDeclaration, GoogleGenAI } from '@google/genai';
+import {
+  Content,
+  FunctionCallingConfigMode,
+  FunctionDeclaration,
+  GoogleGenAI,
+} from '@google/genai';
 import { Provider, ProviderEvent, StreamOptions } from './provider';
 import { availableTools } from '@/tools';
 import { SYSTEM_PROMPT } from '@/prompt';
@@ -42,31 +47,50 @@ export class GeminiProvider implements Provider {
 
   async stream(options: StreamOptions) {
     try {
-      const prompt: Content[] = [
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT.template }] },
-      ];
       // previous messages
-      const content: Content[] = options.messages.map((message) => {
+      const content: Content[] = [];
+      let currentContent: Content | null = null;
+
+      for (const message of options.messages) {
         if ('role' in message) {
-          return {
-            parts: [{ text: message.content }],
-            role: message.role === 'user' ? 'user' : 'model',
-          };
+          if (
+            currentContent &&
+            currentContent.role === (message.role === 'user' ? 'user' : 'model')
+          ) {
+            currentContent.parts.push({ text: message.content });
+          } else {
+            currentContent = {
+              parts: [{ text: message.content }],
+              role: message.role === 'user' ? 'user' : 'model',
+            };
+            content.push(currentContent);
+          }
         } else if (message.type === 'toolCall') {
-          return {
-            parts: [
-              {
-                functionCall: {
-                  args: message.args,
-                  id: message.callId,
-                  name: message.name,
-                },
+          if (currentContent && currentContent.role === 'model') {
+            currentContent.parts.push({
+              functionCall: {
+                args: message.args,
+                id: message.callId,
+                name: message.name,
               },
-            ],
-            role: 'model',
-          };
+            });
+          } else {
+            currentContent = {
+              parts: [
+                {
+                  functionCall: {
+                    args: message.args,
+                    id: message.callId,
+                    name: message.name,
+                  },
+                },
+              ],
+              role: 'model',
+            };
+            content.push(currentContent);
+          }
         } else if (message.type === 'toolCallOutput') {
-          return {
+          currentContent = {
             parts: [
               {
                 functionResponse: {
@@ -76,16 +100,23 @@ export class GeminiProvider implements Provider {
                 },
               },
             ],
-            role: 'tool',
+            role: 'function',
           };
+          content.push(currentContent);
         }
-      }) as Content[];
+      }
 
       const stream = await this.genAI.models.generateContentStream({
         model: this.modelName,
-        contents: [...prompt, ...content],
+        contents: content,
         config: {
           tools: [{ functionDeclarations: this.tools }],
+          toolConfig: {
+            functionCallingConfig: {
+              mode: FunctionCallingConfigMode.AUTO,
+            },
+          },
+          systemInstruction: SYSTEM_PROMPT.template,
         },
       }); // returns GenerateContentResponse
 
@@ -99,7 +130,7 @@ export class GeminiProvider implements Provider {
             for await (const chunk of stream) {
               if (cancelled) break;
 
-              logger.info('GENAI EVENT CHUNK:', chunk);
+              // logger.info('GENAI EVENT CHUNK:', chunk);
 
               if (!responseId) {
                 responseId = chunk.responseId;
@@ -124,9 +155,8 @@ export class GeminiProvider implements Provider {
             }
             if (fullText) {
               observer.next({ type: 'fullText', content: fullText });
-
-              observer.complete();
             }
+            observer.complete();
           } catch (err) {
             observer.error(err);
           }
