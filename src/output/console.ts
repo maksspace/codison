@@ -17,7 +17,7 @@ export class ConsoleOutputHandler implements OutputHandler {
 
   handle(event: AgentEvent): void {
     switch (event.type) {
-      case 'text': {
+      case 'partialText': {
         process.stdout.write(event.content);
         break;
       }

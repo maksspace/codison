@@ -36,8 +36,11 @@ export class Agent {
         await lastValueFrom(
           stream$.pipe(
             tap((event) => {
-              if (event.type === 'text') {
-                subscriber.next({ type: 'text', content: event.content });
+              if (event.type === 'partialText') {
+                subscriber.next({
+                  type: 'partialText',
+                  content: event.content,
+                });
               } else if (event.type === 'fullText') {
                 subscriber.next({ type: 'fullText', content: event.content });
                 this.history.addMessage({

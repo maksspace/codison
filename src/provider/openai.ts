@@ -16,16 +16,14 @@ const PROVIDER_NAME = 'openai';
 
 export class OpenAIProvider implements Provider {
   private openai: OpenAI;
-  private modelName: string;
   private tools: FunctionTool[];
 
   constructor() {
     if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is not set.');
+      console.log('OPENAI_API_KEY environment variable is not set.');
     }
 
     this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    this.modelName = MODEL_NAME;
     this.tools = availableTools.map((tool) => ({
       type: 'function',
       name: tool.name,
@@ -33,18 +31,6 @@ export class OpenAIProvider implements Provider {
       parameters: tool.schema,
       strict: true,
     }));
-  }
-
-  getModelName(): string {
-    return MODEL_NAME;
-  }
-
-  getName(): string {
-    return PROVIDER_NAME;
-  }
-
-  supportsPreviousResponseId(): boolean {
-    return true;
   }
 
   async stream(options: StreamOptions) {
@@ -74,7 +60,7 @@ export class OpenAIProvider implements Provider {
       );
 
       const stream = await this.openai.responses.create({
-        model: this.modelName,
+        model: MODEL_NAME,
         instructions: !options.previousResponseId
           ? SYSTEM_PROMPT.template
           : undefined,
@@ -92,14 +78,14 @@ export class OpenAIProvider implements Provider {
             for await (const event of stream) {
               if (cancelled) break;
 
-              logger.info('OPENAI EVENt', event);
+              logger.info('OPENAI EVENT', event);
 
               switch (event.type) {
                 case 'response.created':
                   observer.next({ type: 'start', id: event.response.id });
                   break;
                 case 'response.output_text.delta':
-                  observer.next({ type: 'text', content: event.delta });
+                  observer.next({ type: 'partialText', content: event.delta });
                   break;
                 case 'response.output_text.done':
                   observer.next({ type: 'fullText', content: event.text });

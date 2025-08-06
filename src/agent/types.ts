@@ -1,5 +1,5 @@
-export interface AgentTextEvent {
-  type: 'text';
+export interface AgentPartialTextEvent {
+  type: 'partialText';
   content: string;
 }
 
@@ -30,7 +30,7 @@ export interface AgentDoneEvent {
 }
 
 export type AgentEvent =
-  | AgentTextEvent
+  | AgentPartialTextEvent
   | AgentFullTextEvent
   | AgentToolCallEvent
   | AgentToolCallOutputEvent

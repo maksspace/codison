@@ -10,22 +10,19 @@ import { SYSTEM_PROMPT } from '@/prompt';
 import { Observable } from 'rxjs';
 import { logger } from '@/logger';
 
-//  TODO: change to choose model
 const MODEL_NAME = 'gemini-2.0-flash-001'; // 'gemini-1.5-flash', 'gemini-2.0-flash-001'
 const PROVIDER_NAME = 'google';
 
 export class GeminiProvider implements Provider {
   private genAI: GoogleGenAI;
-  private modelName: string;
   private tools: FunctionDeclaration[];
 
   constructor() {
     if (!process.env.GEMINI_API_KEY) {
-      console.log('GEMINI_API_KEY environment variable is not set.');
+      throw new Error('GEMINI_API_KEY environment variable is not set.');
     }
 
     this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    this.modelName = MODEL_NAME;
     this.tools = availableTools.map((tool) => ({
       name: tool.name,
       description: tool.description,
@@ -47,9 +44,8 @@ export class GeminiProvider implements Provider {
 
   async stream(options: StreamOptions) {
     try {
-      // previous messages
       const content: Content[] = [];
-      let currentContent: Content | null = null;
+      let currentContent: Content;
 
       for (const message of options.messages) {
         if ('role' in message) {
@@ -107,7 +103,7 @@ export class GeminiProvider implements Provider {
       }
 
       const stream = await this.genAI.models.generateContentStream({
-        model: this.modelName,
+        model: MODEL_NAME,
         contents: content,
         config: {
           tools: [{ functionDeclarations: this.tools }],
@@ -118,7 +114,7 @@ export class GeminiProvider implements Provider {
           },
           systemInstruction: SYSTEM_PROMPT.template,
         },
-      }); // returns GenerateContentResponse
+      });
 
       const response = new Observable<ProviderEvent>((observer) => {
         let cancelled = false;
@@ -141,13 +137,26 @@ export class GeminiProvider implements Provider {
 
               for (const part of candidate.content.parts) {
                 if (part.text) {
-                  observer.next({ type: 'text', content: part.text });
+                  observer.next({ type: 'partialText', content: part.text });
                   fullText += part.text;
                 } else if (part.functionCall) {
+                  observer.next({
+                    type: 'startTool',
+                    name: part.functionCall.name,
+                  });
+                  observer.next({
+                    type: 'beginToolCall',
+                    name: part.functionCall.name,
+                    args: part.functionCall.args,
+                  });
                   observer.next({
                     type: 'toolCall',
                     name: part.functionCall.name,
                     args: part.functionCall.args,
+                    callId: part.functionCall.id,
+                  });
+                  observer.next({
+                    type: 'endTool',
                     callId: part.functionCall.id,
                   });
                 }
@@ -155,6 +164,7 @@ export class GeminiProvider implements Provider {
             }
             if (fullText) {
               observer.next({ type: 'fullText', content: fullText });
+              observer.next({ type: 'endText', id: responseId });
             }
             observer.complete();
           } catch (err) {

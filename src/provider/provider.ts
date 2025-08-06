@@ -1,18 +1,34 @@
 import { Observable } from 'rxjs';
 
-export interface StartEvent {
+export interface StartTextEvent {
   type: 'start';
   id: string;
 }
 
-export interface TextEvent {
-  type: 'text';
+export interface PartialTextEvent {
+  type: 'partialText';
   content: string;
 }
 
 export interface FullTextEvent {
   type: 'fullText';
   content: string;
+}
+
+export interface EndTextEvent {
+  type: 'endText';
+  id: string;
+}
+
+export interface StartToolEvent {
+  type: 'startTool';
+  name: string;
+}
+
+export interface BeginToolCall {
+  type: 'beginToolCall';
+  name: string;
+  args: Record<string, unknown>;
 }
 
 export interface ToolCallEvent {
@@ -22,11 +38,20 @@ export interface ToolCallEvent {
   callId: string;
 }
 
+export interface EndToolEvent {
+  type: 'endTool';
+  callId: string;
+}
+
 export type ProviderEvent =
-  | StartEvent
-  | TextEvent
+  | StartTextEvent
+  | PartialTextEvent
   | FullTextEvent
-  | ToolCallEvent;
+  | EndTextEvent
+  | StartToolEvent
+  | BeginToolCall
+  | ToolCallEvent
+  | EndToolEvent;
 
 export interface UserMessage {
   role: 'user';
@@ -64,11 +89,5 @@ export interface StreamOptions {
 }
 
 export interface Provider {
-  getModelName(): string;
-
-  getName(): string;
-
-  supportsPreviousResponseId(): boolean;
-
   stream(options: StreamOptions): Promise<Observable<ProviderEvent>>;
 }
