@@ -6,35 +6,20 @@ import { Tool } from '@/tools';
 import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
-<<<<<<< HEAD
 import { Provider, ProviderEvent, StreamOptions } from './provider';
 
 export interface CreateGeminiProviderOptions {
   apiKey: string;
   tools: Tool[];
 }
-=======
-const MODEL_NAME = 'gemini-2.0-flash-001'; // 'gemini-1.5-flash', 'gemini-2.0-flash-001'
-const PROVIDER_NAME = 'google';
->>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
 
 export class GeminiProvider implements Provider {
   private genAI: GoogleGenAI;
   private tools: FunctionDeclaration[];
 
-<<<<<<< HEAD
   constructor(options: CreateGeminiProviderOptions) {
     this.genAI = new GoogleGenAI({ apiKey: options.apiKey });
     this.tools = options.tools?.map((tool) => ({
-=======
-  constructor() {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY environment variable is not set.');
-    }
-
-    this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    this.tools = availableTools.map((tool) => ({
->>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
       name: tool.name,
       description: tool.description,
       parameters: tool.schema,
@@ -44,11 +29,7 @@ export class GeminiProvider implements Provider {
   async stream(options: StreamOptions) {
     try {
       const content: Content[] = [];
-<<<<<<< HEAD
       let prevMessage: Content;
-=======
-      let currentContent: Content;
->>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
 
       for (const message of options.messages) {
         let newMessageRole: string;
@@ -90,11 +71,7 @@ export class GeminiProvider implements Provider {
       }
 
       const stream = await this.genAI.models.generateContentStream({
-<<<<<<< HEAD
         model: 'gemini-2.0-flash-001',
-=======
-        model: MODEL_NAME,
->>>>>>> 723abbc (feat(CG-63): Events created and added to Gemini, resolved comments)
         contents: content,
         config: {
           tools: [{ functionDeclarations: this.tools }],
@@ -140,7 +117,7 @@ export class GeminiProvider implements Provider {
                   });
                   observer.next({
                     type: 'startTool',
-                    name: part.functionCall.name,
+                    callId: newCallId,
                   });
                   observer.next({
                     type: 'beginToolCall',
@@ -159,7 +136,7 @@ export class GeminiProvider implements Provider {
                   });
                   observer.next({
                     type: 'endTool',
-                    callId: part.functionCall.id,
+                    callId: newCallId,
                   });
                 }
               }
