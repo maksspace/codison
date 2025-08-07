@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 export interface StartTextEvent {
-  type: 'start';
+  type: 'startText';
   id: string;
 }
 
@@ -22,7 +22,7 @@ export interface EndTextEvent {
 
 export interface StartToolEvent {
   type: 'startTool';
-  name: string;
+  callId: string;
 }
 
 export interface BeginToolCall {

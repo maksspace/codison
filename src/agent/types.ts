@@ -1,3 +1,8 @@
+export interface AgentStartTextEvent {
+  type: 'startText';
+  id: string;
+}
+
 export interface AgentPartialTextEvent {
   type: 'partialText';
   content: string;
@@ -6,6 +11,22 @@ export interface AgentPartialTextEvent {
 export interface AgentFullTextEvent {
   type: 'fullText';
   content: string;
+}
+
+export interface AgentEndTextEvent {
+  type: 'endText';
+  id: string;
+}
+
+export interface AgentStartToolEvent {
+  type: 'startTool';
+  callId: string;
+}
+
+export interface AgentBeginToolCall {
+  type: 'beginToolCall';
+  name: string;
+  args: Record<string, unknown>;
 }
 
 export interface AgentToolCallEvent {
@@ -20,6 +41,11 @@ export interface AgentToolCallOutputEvent {
   output: string;
 }
 
+export interface AgentEndToolEvent {
+  type: 'endTool';
+  callId: string;
+}
+
 export interface AgentErrorEvent {
   type: 'error';
   error: string;
@@ -30,10 +56,15 @@ export interface AgentDoneEvent {
 }
 
 export type AgentEvent =
+  | AgentStartTextEvent
   | AgentPartialTextEvent
   | AgentFullTextEvent
+  | AgentEndTextEvent
+  | AgentStartToolEvent
+  | AgentBeginToolCall
   | AgentToolCallEvent
   | AgentToolCallOutputEvent
+  | AgentEndToolEvent
   | AgentErrorEvent
   | AgentDoneEvent;
 

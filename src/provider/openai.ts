@@ -12,7 +12,6 @@ import { logger } from '@/logger';
 import { ProviderEvent, Provider, StreamOptions } from './provider';
 
 const MODEL_NAME = 'gpt-4o-mini';
-const PROVIDER_NAME = 'openai';
 
 export class OpenAIProvider implements Provider {
   private openai: OpenAI;
@@ -82,13 +81,29 @@ export class OpenAIProvider implements Provider {
 
               switch (event.type) {
                 case 'response.created':
-                  observer.next({ type: 'start', id: event.response.id });
+                  observer.next({ type: 'startText', id: event.response.id });
                   break;
                 case 'response.output_text.delta':
                   observer.next({ type: 'partialText', content: event.delta });
                   break;
                 case 'response.output_text.done':
                   observer.next({ type: 'fullText', content: event.text });
+                  observer.next({ type: 'endText', id: event.item_id });
+                  break;
+                case 'response.output_item.added':
+                  if (event.item.type === 'function_call') {
+                    observer.next({
+                      type: 'startTool',
+                      callId: event.item.call_id,
+                    });
+                    observer.next({
+                      type: 'beginToolCall',
+                      name: event.item.name,
+                      args: event.item.arguments
+                        ? JSON.parse(event.item.arguments)
+                        : {},
+                    });
+                  }
                   break;
                 case 'response.output_item.done':
                   if (event.item.type === 'function_call') {
@@ -96,6 +111,10 @@ export class OpenAIProvider implements Provider {
                       type: 'toolCall',
                       name: event.item.name,
                       args: JSON.parse(event.item.arguments),
+                      callId: event.item.call_id,
+                    });
+                    observer.next({
+                      type: 'endTool',
                       callId: event.item.call_id,
                     });
                   }

@@ -22,10 +22,27 @@ export class ConsoleOutputHandler implements OutputHandler {
         break;
       }
 
+      case 'startTool': {
+        process.stdout.write(`\n[Start Tool ${event.callId}]\n`);
+        break;
+      }
+
+      case 'beginToolCall': {
+        process.stdout.write(
+          `\n[Begin Tool call: ${event.name}] ${JSON.stringify(event.args)}\n`,
+        );
+        break;
+      }
+
       case 'toolCall': {
         process.stdout.write(
           `\n[Tool Requested: ${event.name}] ${JSON.stringify(event.args)}\n`,
         );
+        break;
+      }
+
+      case 'endTool': {
+        process.stdout.write(`\n[End Tool ${event.callId}]\n`);
         break;
       }
 
