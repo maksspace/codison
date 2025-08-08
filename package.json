@@ -40,10 +40,6 @@
   },
   "dependencies": {
     "@google/genai": "^1.12.0",
-    "@google/generative-ai": "^0.24.1",
-    "@langchain/core": "^0.3.66",
-    "@langchain/langgraph": "^0.3.7",
-    "@langchain/openai": "^0.5.18",
     "@mozilla/readability": "^0.6.0",
     "@types/jsdom": "^21.1.7",
     "axios": "1.7.7",

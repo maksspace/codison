@@ -36,13 +36,29 @@ export class Agent {
         await lastValueFrom(
           stream$.pipe(
             tap((event) => {
-              if (event.type === 'text') {
-                subscriber.next({ type: 'text', content: event.content });
+              if (event.type === 'startText') {
+                subscriber.next({ type: 'startText', id: event.id });
+              }
+              if (event.type === 'partialText') {
+                subscriber.next({
+                  type: 'partialText',
+                  content: event.content,
+                });
               } else if (event.type === 'fullText') {
                 subscriber.next({ type: 'fullText', content: event.content });
                 this.history.addMessage({
                   role: 'assistant',
                   content: event.content,
+                });
+              } else if (event.type === 'endText') {
+                subscriber.next({ type: 'endText', id: event.id });
+              } else if (event.type === 'startTool') {
+                subscriber.next({ type: 'startTool', callId: event.callId });
+              } else if (event.type === 'beginToolCall') {
+                subscriber.next({
+                  type: 'beginToolCall',
+                  name: event.name,
+                  args: event.args,
                 });
               } else if (event.type === 'toolCall') {
                 subscriber.next({
@@ -58,6 +74,8 @@ export class Agent {
                 });
 
                 toolCalls.push(event);
+              } else if (event.type === 'endTool') {
+                subscriber.next({ type: 'endTool', callId: event.callId });
               }
             }),
           ),
@@ -84,6 +102,7 @@ export class Agent {
             });
             this.history.addMessage({
               type: 'toolCallOutput',
+              name: call.name,
               callId: call.callId,
               output: result,
             });
