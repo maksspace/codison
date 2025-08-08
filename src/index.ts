@@ -18,8 +18,8 @@ async function main() {
     "Type your questions below. Type 'exit' or 'quit' to end the session.",
   );
 
-  // const provider = new OpenAIProvider();
-  const provider = new GeminiProvider();
+  const provider = new OpenAIProvider();
+  // const provider = new GeminiProvider();
   const history = new History();
   const agent = new Agent({ provider, history, tools: availableTools });
   const channel = new Channel(agent);
