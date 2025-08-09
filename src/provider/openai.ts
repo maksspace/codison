@@ -19,7 +19,7 @@ export class OpenAIProvider implements Provider {
 
   constructor() {
     if (!process.env.OPENAI_API_KEY) {
-      console.log('OPENAI_API_KEY environment variable is not set.');
+      throw new Error('OPENAI_API_KEY environment variable is not set.');
     }
 
     this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
