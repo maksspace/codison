@@ -1,4 +1,4 @@
-import { logger } from '../logger';
+import { logger } from '@/logger';
 import { Tool } from './types';
 import { exec } from 'child_process';
 
@@ -24,14 +24,14 @@ export class ShellTool implements Tool {
     return new Promise((resolve) => {
       exec(args.command, (error, stdout, stderr) => {
         if (error) {
-          console.error(`[Shell] exec error: ${error}`);
+          logger.error(`[Shell] exec error: ${error}`);
           resolve(
             `Command failed: ${error.message}${stderr ? '\nStderr: ' + stderr : ''}`,
           );
           return;
         }
         if (stderr && !stdout) {
-          console.warn(`[Shell] Command stderr: ${stderr}`);
+          logger.warn(`[Shell] Command stderr: ${stderr}`);
           resolve(`Command produced stderr: ${stderr}`);
           return;
         }

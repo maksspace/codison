@@ -9,7 +9,8 @@ import { AgentEvent, RunAgentOptions } from './types';
 export interface AgentOptions {
   provider: Provider;
   history: History;
-  tools: Tool[];
+  tools?: Tool[];
+  workingDir?: string;
 }
 
 export class Agent {
@@ -24,7 +25,7 @@ export class Agent {
   }
 
   public run(options: RunAgentOptions): Observable<AgentEvent> {
-    this.history.addMessage({ role: 'user', content: options.query });
+    this.history.addMessage({ role: 'user', content: options.prompt });
 
     return new Observable<AgentEvent>((subscriber) => {
       const step = async (): Promise<void> => {

@@ -69,12 +69,5 @@ export type AgentEvent =
   | AgentDoneEvent;
 
 export interface RunAgentOptions {
-  query: string;
-}
-
-export interface AgentContext {
-  os?: string;
-  projectName?: string;
-  workspaceLanguage?: string;
-  currentDate?: string;
+  prompt: string;
 }

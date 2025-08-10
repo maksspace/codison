@@ -1,7 +1,7 @@
 import { Tool } from './types';
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { logger } from '../logger';
+import { logger } from '@/logger';
 
 export class WriteTool implements Tool {
   name = 'write';
@@ -9,31 +9,31 @@ export class WriteTool implements Tool {
   schema = {
     type: 'object',
     properties: {
-      filePath: {
+      path: {
         type: 'string',
-        description: 'The path to the file to write.',
+        description: 'Absolute path to the file',
       },
       content: {
         type: 'string',
-        description: 'The content to write to the file.',
+        description: 'The content to write to the file',
       },
     },
-    required: ['filePath', 'content'],
+    required: ['path', 'content'],
     additionalProperties: false,
   };
 
-  async execute(args: { filePath: string; content: string }): Promise<string> {
+  async execute(args: { path: string; content: string }): Promise<string> {
     logger.info(
-      `[FileWriter] Writing to file: "${args.filePath}" with content: "${args.content.substring(0, 50)}..."`,
+      `[FileWriter] Writing to file: "${args.path}" with content: "${args.content.substring(0, 50)}..."`,
     );
     try {
-      const absolutePath = path.resolve(args.filePath);
+      const absolutePath = path.resolve(args.path);
       await fs.mkdir(path.dirname(absolutePath), { recursive: true });
       await fs.writeFile(absolutePath, args.content, { encoding: 'utf8' });
-      return `Successfully wrote to file: '${args.filePath}'`;
-    } catch (error: any) {
-      console.error(`Error writing to file ${args.filePath}:`, error);
-      return `Error: Could not write to file '${args.filePath}'. ${error.message}`;
+      return `Successfully wrote to file: '${args.path}'`;
+    } catch (err) {
+      logger.error(`Error writing to file ${args.path}:`, err);
+      return `Error: Could not write to file '${args.path}'. ${err.message}`;
     }
   }
 }

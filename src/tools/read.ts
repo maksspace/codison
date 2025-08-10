@@ -1,20 +1,20 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
 import { Tool } from './types';
-import { logger } from '../logger';
+import { logger } from '@/logger';
 
 export class ReadTool implements Tool {
   name = 'read';
-  description = 'Reads the content of a file from the filesystem.';
+  description = 'Reads the content of a file from the filesystem';
   schema = {
     type: 'object',
     properties: {
-      filePath: {
+      path: {
         type: 'string',
-        description: 'The path to the file to read.',
+        description: 'Absolute path to the file',
       },
     },
-    required: ['filePath'],
+    required: ['path'],
     additionalProperties: false,
   };
 
@@ -24,9 +24,9 @@ export class ReadTool implements Tool {
       const absolutePath = path.resolve(args.filePath);
       const content = await fs.readFile(absolutePath, { encoding: 'utf8' });
       return `Content of '${args.filePath}':\n${content}`;
-    } catch (error: any) {
-      console.error(`Error reading file ${args.filePath}:`, error);
-      return `Error: Could not read file '${args.filePath}'. ${error.message}`;
+    } catch (err) {
+      logger.error(`Error reading file ${args.filePath}:`, err);
+      return `Error: Could not read file '${args.filePath}'. ${err.message}`;
     }
   }
 }

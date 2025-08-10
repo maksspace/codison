@@ -5,25 +5,24 @@ import {
   ResponseCreateParams,
 } from 'openai/resources/responses/responses';
 
+import { Tool } from '@/tools';
 import { SYSTEM_PROMPT } from '@/prompt';
-import { availableTools } from '@/tools';
 import { logger } from '@/logger';
 
 import { ProviderEvent, Provider, StreamOptions } from './provider';
 
-const MODEL_NAME = 'gpt-4o-mini';
+export interface CreateOpenAIProviderOptions {
+  apiKey: string;
+  tools: Tool[];
+}
 
 export class OpenAIProvider implements Provider {
   private openai: OpenAI;
   private tools: FunctionTool[];
 
-  constructor() {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is not set.');
-    }
-
-    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    this.tools = availableTools.map((tool) => ({
+  constructor(options: CreateOpenAIProviderOptions) {
+    this.openai = new OpenAI({ apiKey: options.apiKey });
+    this.tools = options.tools?.map((tool) => ({
       type: 'function',
       name: tool.name,
       description: tool.description,
@@ -59,10 +58,8 @@ export class OpenAIProvider implements Provider {
       );
 
       const stream = await this.openai.responses.create({
-        model: MODEL_NAME,
-        instructions: !options.previousResponseId
-          ? SYSTEM_PROMPT.template
-          : undefined,
+        model: 'gpt-4.1-mini',
+        instructions: !options.previousResponseId ? SYSTEM_PROMPT : undefined,
         previous_response_id: options.previousResponseId,
         input,
         tools: this.tools,

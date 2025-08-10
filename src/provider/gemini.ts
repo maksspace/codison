@@ -1,24 +1,25 @@
 import { Content, FunctionDeclaration, GoogleGenAI, Part } from '@google/genai';
-import { Provider, ProviderEvent, StreamOptions } from './provider';
-import { availableTools } from '@/tools';
-import { SYSTEM_PROMPT } from '@/prompt';
-import { Observable } from 'rxjs';
-import { logger } from '@/logger';
 import { v4 as uuid } from 'uuid';
+import { Observable } from 'rxjs';
 
-const MODEL_NAME = 'gemini-2.0-flash-001'; // 'gemini-1.5-flash', 'gemini-2.0-flash-001'
+import { Tool } from '@/tools';
+import { SYSTEM_PROMPT } from '@/prompt';
+import { logger } from '@/logger';
+
+import { Provider, ProviderEvent, StreamOptions } from './provider';
+
+export interface CreateGeminiProviderOptions {
+  apiKey: string;
+  tools: Tool[];
+}
 
 export class GeminiProvider implements Provider {
   private genAI: GoogleGenAI;
   private tools: FunctionDeclaration[];
 
-  constructor() {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY environment variable is not set.');
-    }
-
-    this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    this.tools = availableTools.map((tool) => ({
+  constructor(options: CreateGeminiProviderOptions) {
+    this.genAI = new GoogleGenAI({ apiKey: options.apiKey });
+    this.tools = options.tools?.map((tool) => ({
       name: tool.name,
       description: tool.description,
       parameters: tool.schema,
@@ -70,11 +71,11 @@ export class GeminiProvider implements Provider {
       }
 
       const stream = await this.genAI.models.generateContentStream({
-        model: MODEL_NAME,
+        model: 'gemini-2.0-flash-001',
         contents: content,
         config: {
           tools: [{ functionDeclarations: this.tools }],
-          systemInstruction: SYSTEM_PROMPT.template,
+          systemInstruction: SYSTEM_PROMPT,
         },
       });
 
@@ -88,7 +89,7 @@ export class GeminiProvider implements Provider {
             for await (const chunk of stream) {
               if (cancelled) break;
 
-              // logger.info('GENAI EVENT CHUNK:', JSON.stringify(chunk, null, 2));
+              logger.info('GENAI EVENT CHUNK:', JSON.stringify(chunk, null, 2));
 
               if (!responseId) {
                 responseId = chunk.responseId;
