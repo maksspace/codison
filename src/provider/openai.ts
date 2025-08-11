@@ -5,11 +5,11 @@ import {
   ResponseCreateParams,
 } from 'openai/resources/responses/responses';
 
-import { Tool } from '@/tools';
 import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
 import { ProviderEvent, Provider, StreamOptions } from './provider';
+import { Tool } from '@/tools/types';
 
 export interface CreateOpenAIProviderOptions {
   apiKey: string;

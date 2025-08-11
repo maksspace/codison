@@ -1,105 +1,57 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Tool } from './types';
+import ignore, { Ignore } from 'ignore';
 
 export class SearchTool implements Tool {
   name = 'searchFiles';
   description =
-    'Searches for files in the working directory matching a given pattern, ignoring directories specified in .gitignore. Returns a list of full file paths.';
+    'Searches for files in a given directory matching a regular expression pattern, while respecting rules specified in .gitignore. Returns a list of full file paths.';
   schema = {
     type: 'object',
     properties: {
-      pattern: {
+      regex: {
         type: 'string',
         description:
-          'The regular expression pattern to match against file names.',
+          'The regular expression pattern to match against file names, provided directly by the agent.',
+      },
+      path: {
+        type: 'string',
+        description:
+          'The full path of the directory to start the search from. This is determined by the agent.',
       },
       maxCount: {
         type: 'number',
-        description:
-          'The maximum number of files to return. Defaults to unlimited if not provided.',
+        description: 'The maximum number of files to return. Defaults to 50',
       },
     },
-    required: ['pattern', 'maxCount'],
+    required: ['regex', 'path', 'maxCount'],
     additionalProperties: false,
   };
 
-  private ignorePatterns: RegExp[] = [];
+  private readonly ignoreManager: Ignore;
   private readonly projectDir: string;
-  private readonly ignorePath: string;
 
   constructor(projectDir: string = process.cwd()) {
     this.projectDir = projectDir;
-    this.ignorePath = path.join(this.projectDir, '.gitignore');
+    this.ignoreManager = ignore();
   }
 
-  private async loadIgnorePatterns(): Promise<void> {
-    const fileContent = await fs.readFile(this.ignorePath, 'utf-8');
-
-    this.ignorePatterns = fileContent
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith('#'))
-      .map((line) => this.convertToRegex(line));
-
+  private async loadIgnoreRules(): Promise<void> {
     const defaults = ['node_modules/', '.git/', 'dist/', 'build/'];
-    defaults.forEach((pattern) => {
-      const regex = this.convertToRegex(pattern);
-      if (!this.ignorePatterns.some((p) => p.source === regex.source)) {
-        this.ignorePatterns.push(regex);
-      }
-    });
-  }
+    this.ignoreManager.add(defaults);
 
-  private convertToRegex(pattern: string): RegExp {
-    let regexString = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-    regexString = regexString.replace(/\*\*\//g, '(?:[^/]+/)*');
-    regexString = regexString.replace(/\*\*/g, '.*');
-    regexString = regexString.replace(/\*/g, '[^/]*');
-    regexString = regexString.replace(/\?/g, '.');
-
-    if (pattern.startsWith('/')) {
-      regexString = '^' + regexString.substring(1);
-    } else {
-      regexString = '(^|/)' + regexString;
+    try {
+      const fileContent = await fs.readFile(
+        path.join(this.projectDir, '.gitignore'),
+        'utf-8',
+      );
+      this.ignoreManager.add(fileContent);
+    } catch (err) {
+      console.log(
+        `[SearchTool] .gitignore not found, proceeding with defaults: ${err}`,
+      );
     }
-
-    if (pattern.endsWith('/')) {
-      if (regexString.endsWith('/')) {
-        regexString = regexString.substring(0, regexString.length - 1);
-      }
-      regexString += '(?:/.*)?$';
-      return new RegExp(regexString, 'i');
-    } else {
-      if (!regexString.endsWith('$') && !regexString.endsWith('.*')) {
-        regexString += '$';
-      }
-      return new RegExp(regexString, 'i');
-    }
-  }
-
-  private isIgnored(fullPath: string): boolean {
-    const relativePath = path.relative(this.projectDir, fullPath);
-    const normalizedPath = relativePath.replace(/\\/g, '/');
-    if (normalizedPath === '') {
-      return false;
-    }
-
-    for (const pattern of this.ignorePatterns) {
-      if (pattern.test(normalizedPath)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private createFileRegex(pattern: string): RegExp {
-    if (pattern.startsWith('*.')) {
-      const extension = pattern.substring(2);
-      const escapedExt = extension.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      return new RegExp(`\\.${escapedExt}$`, 'i');
-    }
-    return new RegExp(pattern, 'i');
   }
 
   private async searchDirectory(
@@ -119,7 +71,11 @@ export class SearchTool implements Tool {
 
       for (const item of folderContents) {
         const fullPath = path.join(currentDir, item.name);
-        if (this.isIgnored(fullPath)) {
+        const relativePath = path
+          .relative(this.projectDir, fullPath)
+          .replace(/\\/g, '/');
+
+        if (this.ignoreManager.ignores(relativePath)) {
           continue;
         }
 
@@ -145,21 +101,21 @@ export class SearchTool implements Tool {
   }
 
   async execute(args: Record<string, any>): Promise<string> {
-    await this.loadIgnorePatterns();
+    await this.loadIgnoreRules();
     console.log('[SearchTool] Starting file search...');
 
-    const pattern = args.pattern as string;
-    const maxCount = args.maxCount as number | undefined;
+    const regex = args.regex as string;
+    const searchPath = args.path as string;
+    const maxCount = args.maxCount as number;
 
     const filesFound: string[] = [];
-    const fileRegex = this.createFileRegex(pattern);
+    const searchRoot = path.isAbsolute(searchPath)
+      ? searchPath
+      : path.join(this.projectDir, searchPath);
 
-    await this.searchDirectory(
-      this.projectDir,
-      fileRegex,
-      filesFound,
-      maxCount,
-    );
+    const fileRegex = new RegExp(regex, 'i');
+
+    await this.searchDirectory(searchRoot, fileRegex, filesFound, maxCount);
 
     if (filesFound.length === 0) {
       return 'No files found matching the pattern';

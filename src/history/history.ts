@@ -18,4 +18,8 @@ export class History {
   getMessages(): ProviderMessage[] {
     return this.messages;
   }
+
+  clear(): void {
+    this.messages = [];
+  }
 }

@@ -2,11 +2,11 @@ import { Content, FunctionDeclaration, GoogleGenAI, Part } from '@google/genai';
 import { v4 as uuid } from 'uuid';
 import { Observable } from 'rxjs';
 
-import { Tool } from '@/tools';
 import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
 import { Provider, ProviderEvent, StreamOptions } from './provider';
+import { Tool } from '@/tools/types';
 
 export interface CreateGeminiProviderOptions {
   apiKey: string;
@@ -116,22 +116,9 @@ export class GeminiProvider implements Provider {
                     args: part.functionCall.args,
                   });
                   observer.next({
-                    type: 'startTool',
-                    callId: newCallId,
-                  });
-                  observer.next({
-                    type: 'beginToolCall',
-                    name: part.functionCall.name,
-                    args: part.functionCall.args,
-                  });
-                  observer.next({
                     type: 'toolCall',
                     name: part.functionCall.name,
                     args: part.functionCall.args,
-                    callId: newCallId,
-                  });
-                  observer.next({
-                    type: 'endTool',
                     callId: newCallId,
                   });
                   observer.next({
