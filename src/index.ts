@@ -18,8 +18,14 @@ async function main() {
     "Type your questions below. Type 'exit' or 'quit' to end the session.",
   );
 
-  // const provider = new OpenAIProvider();
-  const provider = new GeminiProvider();
+  const provider = new OpenAIProvider({
+    apiKey: process.env.OPENAI_API_KEY,
+    tools: availableTools,
+  });
+  // const provider = new GeminiProvider({
+  //   apiKey: process.env.GEMINI_API_KEY,
+  //   tools: availableTools,
+  // });
   const history = new History();
   const agent = new Agent({ provider, history, tools: availableTools });
   const channel = new Channel(agent);
@@ -44,12 +50,12 @@ async function main() {
         keepRunning = false;
         logger.info('Exiting AI Agent CLI. Goodbye!');
 
-        const sessionTotals = history.getOverallSessionTokenUsage();
-        logger.info('\n[TokenUsage] Session:');
-        logger.info(`  Prompt Tokens: ${sessionTotals.promptTokens}`);
-        logger.info(`  Completion Tokens: ${sessionTotals.completionTokens}`);
-        logger.info(`  Total Tokens: ${sessionTotals.totalTokens}`);
-        logger.info(`  Total Cost (USD): $${sessionTotals.costUSD.toFixed(6)}`);
+        // const sessionTotals = history.getOverallSessionTokenUsage();
+        // logger.info('\n[TokenUsage] Session:');
+        // logger.info(`  Prompt Tokens: ${sessionTotals.promptTokens}`);
+        // logger.info(`  Completion Tokens: ${sessionTotals.completionTokens}`);
+        // logger.info(`  Total Tokens: ${sessionTotals.totalTokens}`);
+        // logger.info(`  Total Cost (USD): $${sessionTotals.costUSD.toFixed(6)}`);
 
         history.clear();
 
@@ -61,7 +67,7 @@ async function main() {
         continue;
       }
 
-      channel.input$.next({ query: userInput });
+      channel.input$.next({ prompt: userInput });
     } catch (error) {
       logger.error('An error occurred during interaction:', error);
     }

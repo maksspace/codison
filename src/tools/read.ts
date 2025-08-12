@@ -11,22 +11,23 @@ export class ReadTool implements Tool {
     properties: {
       path: {
         type: 'string',
-        description: 'Absolute path to the file',
+        description:
+          'The absolute file system path to the file. This path must start from the root (e.g., C:\\Users\\... or /home/user/...).',
       },
     },
     required: ['path'],
     additionalProperties: false,
   };
 
-  async execute(args: { filePath: string }): Promise<string> {
-    logger.info(`[FileReader] Reading file: "${args.filePath}"`);
+  async execute(args: { path: string }): Promise<string> {
+    logger.info(`[FileReader] Reading file: "${args.path}"`);
     try {
-      const absolutePath = path.resolve(args.filePath);
+      const absolutePath = path.resolve(args.path);
       const content = await fs.readFile(absolutePath, { encoding: 'utf8' });
-      return `Content of '${args.filePath}':\n${content}`;
+      return `Content of '${args.path}':\n${content}`;
     } catch (err) {
-      logger.error(`Error reading file ${args.filePath}:`, err);
-      return `Error: Could not read file '${args.filePath}'. ${err.message}`;
+      logger.error(`Error reading file ${args.path}:`, err);
+      return `Error: Could not read file '${args.path}'. ${err.message}`;
     }
   }
 }

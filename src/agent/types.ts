@@ -2,7 +2,6 @@ export interface AgentStartTextEvent {
   type: 'startText';
   id: string;
 }
-
 export interface AgentPartialTextEvent {
   type: 'partialText';
   content: string;

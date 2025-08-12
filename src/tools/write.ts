@@ -11,7 +11,8 @@ export class WriteTool implements Tool {
     properties: {
       path: {
         type: 'string',
-        description: 'Absolute path to the file',
+        description:
+          'The absolute file system path to the file. This path must start from the root (e.g., C:\\Users\\... or /home/user/...).',
       },
       content: {
         type: 'string',

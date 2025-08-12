@@ -2,11 +2,11 @@ import { Content, FunctionDeclaration, GoogleGenAI, Part } from '@google/genai';
 import { v4 as uuid } from 'uuid';
 import { Observable } from 'rxjs';
 
-import { Tool } from '@/tools';
 import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
 import { Provider, ProviderEvent, StreamOptions } from './provider';
+import { Tool } from '@/tools';
 
 export interface CreateGeminiProviderOptions {
   apiKey: string;
