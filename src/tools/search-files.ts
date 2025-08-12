@@ -18,7 +18,7 @@ export class SearchTool implements Tool {
       path: {
         type: 'string',
         description:
-          'The absolute file system path of the directory to search within (e.g., C:\\Users\\...\\codison). This path is determined by the agent and provided in its full form.',
+          'The absolute file system path of the directory to search within (e.g., C:\\Users\\...\\codison or /home/user/...). This path is determined by the agent and provided in its full form.',
       },
       maxCount: {
         type: 'number',
