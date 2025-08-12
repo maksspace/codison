@@ -9,7 +9,7 @@ import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
 import { ProviderEvent, Provider, StreamOptions } from './provider';
-import { Tool } from '@/tools/types';
+import { Tool } from '@/tools';
 
 export interface CreateOpenAIProviderOptions {
   apiKey: string;

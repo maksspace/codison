@@ -10,3 +10,5 @@ export const availableTools: Tool[] = [
   new ReadTool(),
   new SearchTool(),
 ];
+
+export { Tool };

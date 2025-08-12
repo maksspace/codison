@@ -2,7 +2,7 @@ import { lastValueFrom, Observable, tap } from 'rxjs';
 
 import { Provider, ToolCallEvent } from '@/provider';
 import { History } from '@/history';
-import { Tool } from '@/tools/types';
+import { Tool } from '@/tools';
 import { AgentEvent, RunAgentOptions } from './types';
 
 export interface AgentOptions {

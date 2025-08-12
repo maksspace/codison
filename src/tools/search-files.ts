@@ -18,7 +18,7 @@ export class SearchTool implements Tool {
       path: {
         type: 'string',
         description:
-          'The full path of the directory to start the search from. This is determined by the agent.',
+          'The absolute file system path of the directory to search within (e.g., C:\\Users\\...\\codison). This path is determined by the agent and provided in its full form.',
       },
       maxCount: {
         type: 'number',
@@ -109,9 +109,7 @@ export class SearchTool implements Tool {
     const maxCount = args.maxCount as number;
 
     const filesFound: string[] = [];
-    const searchRoot = path.isAbsolute(searchPath)
-      ? searchPath
-      : path.join(this.projectDir, searchPath);
+    const searchRoot = searchPath;
 
     const fileRegex = new RegExp(regex, 'i');
 

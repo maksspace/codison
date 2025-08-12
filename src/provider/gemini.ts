@@ -6,7 +6,7 @@ import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
 import { Provider, ProviderEvent, StreamOptions } from './provider';
-import { Tool } from '@/tools/types';
+import { Tool } from '@/tools';
 
 export interface CreateGeminiProviderOptions {
   apiKey: string;

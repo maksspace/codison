@@ -12,7 +12,7 @@ export class ShellTool implements Tool {
       command: {
         type: 'string',
         description:
-          'The shell command to execute. Use commands appropriate for the current OS and shell environment.',
+          'Executes a shell command. Use this for operations that can only be done on the command line. For file reading or searching, use the dedicated "read" and "searchFiles" tools to avoid errors. Use commands appropriate for the current OS and shell environment.',
       },
     },
     required: ['command'],
