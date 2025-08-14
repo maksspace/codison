@@ -68,7 +68,7 @@ export class LsTool implements Tool {
 
         const relativePath = path.relative(rootDir, fullPath);
 
-        results.push(relativePath);
+        results.push(relativePath + (item.isDirectory() ? path.sep : ''));
 
         if (item.isDirectory() && currentDepth < maxDepth) {
           await this.traverseDirectory(
