@@ -26,8 +26,7 @@ export class LsTool implements Tool {
   };
 
   async execute(args: { path: string; depth: number }): Promise<string> {
-    const dirPath = args.path;
-    const depth = args.depth !== undefined ? args.depth : 1;
+    const { path: dirPath, depth = 1 } = args;
 
     const results: string[] = [];
 
