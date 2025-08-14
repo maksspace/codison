@@ -1,3 +1,4 @@
+import { logger } from '@/logger';
 import { Tool } from './types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -25,18 +26,18 @@ export class LsTool implements Tool {
   };
 
   async execute(args: { path: string; depth: number }): Promise<string> {
-    const { path: dirPath, depth = 1 } = args;
+    const dirPath = args.path;
+    const depth = args.depth !== undefined ? args.depth : 1;
 
     const results: string[] = [];
-    const absPath = path.resolve(dirPath);
 
     try {
-      const stats = await fs.stat(absPath);
+      const stats = await fs.stat(dirPath);
       if (!stats.isDirectory()) {
         return `Error: Path '${dirPath}' is not a directory.`;
       }
 
-      await this.traverseDirectory(absPath, absPath, 0, depth, results);
+      await this.traverseDirectory(dirPath, dirPath, 0, depth, results);
 
       if (results.length === 0) {
         return `[Ls Tool] No files or folders found in '${dirPath}'.`;
@@ -44,7 +45,7 @@ export class LsTool implements Tool {
         return results.join('\n');
       }
     } catch (err) {
-      console.log(
+      logger.error(
         `[Ls Tool] Error: Could not list directory '${dirPath}'. ${err.message}`,
       );
     }
@@ -67,7 +68,7 @@ export class LsTool implements Tool {
 
         const relativePath = path.relative(rootDir, fullPath);
 
-        results.push(relativePath + (item.isDirectory() ? path.sep : ''));
+        results.push(relativePath);
 
         if (item.isDirectory() && currentDepth < maxDepth) {
           await this.traverseDirectory(
@@ -80,7 +81,7 @@ export class LsTool implements Tool {
         }
       }
     } catch (err) {
-      console.log(
+      logger.error(
         `[LsTool] Could not read directory ${currentAbsPath}: ${err.message}`,
       );
       results.push(
