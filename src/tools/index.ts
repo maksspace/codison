@@ -5,6 +5,8 @@ import { SearchTool } from './search-files';
 import { Tool } from './types';
 import { LsTool } from './ls';
 import { PatchTool } from './patch';
+import { GetDependeciesTool } from './get-dependecies';
+import { GetProjectInfoTool } from './get-project-info';
 
 export const availableTools: Tool[] = [
   new ShellTool(),
@@ -13,6 +15,8 @@ export const availableTools: Tool[] = [
   new SearchTool(),
   new LsTool(),
   new PatchTool(),
+  new GetDependeciesTool(),
+  new GetProjectInfoTool(),
 ];
 
 export { Tool };
