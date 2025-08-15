@@ -3,7 +3,7 @@ import { Tool } from './types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-export class GetDependeciesTool implements Tool {
+export class GetDependenciesTool implements Tool {
   name = 'getDependencies';
   description =
     'Retrieves the "dependencies" list (with versions) from the package.json file of a given Node.js project path. Returns an empty object if no production dependencies are found.';
@@ -36,7 +36,7 @@ export class GetDependeciesTool implements Tool {
         return JSON.stringify(json.dependencies);
       }
 
-      logger.info('No dependencies found.');
+      logger.info('[DependenciesTool] No dependencies found.');
       return JSON.stringify({});
     } catch (err) {
       logger.error(

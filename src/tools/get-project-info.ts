@@ -38,7 +38,9 @@ export class GetProjectInfoTool implements Tool {
           version: json.version,
         });
       } else {
-        logger.warn(`Name or version aren't specified in package.json`);
+        logger.warn(
+          `[ProjectInfoTool] Name or version aren't specified in package.json`,
+        );
         return JSON.stringify({
           name: json.name,
           version: json.version,
