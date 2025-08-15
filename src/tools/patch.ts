@@ -33,28 +33,34 @@ export class PatchTool implements Tool {
       return `No changes in the patch for '${filePath}'`;
     }
 
-    let fileContent: string;
-
     try {
       await fs.access(filePath);
 
-      let fileContent = await fs.readFile(filePath);
-    } catch (err) {
-      logger.error(`Failed to access file on ${filePath}: ${err.message}`);
-    }
+      const fileContent = await fs.readFile(filePath, { encoding: 'utf-8' });
 
-    try {
-      const patchedContent = applyPatch(fileContent, patchContent);
-
-      if (patchedContent === false) {
-        logger.error('Patch could not be applied.');
+      if (!fileContent) {
+        logger.error(`[PatchTool] Error reading file for patching`);
       }
 
-      await fs.writeFile(filePath, patchedContent as string);
+      try {
+        const patchedContent = applyPatch(fileContent, patchContent);
 
-      return 'Succesfully patched file';
+        if (patchedContent === false) {
+          logger.error('[PatchTool] Patch could not be applied.');
+        }
+
+        await fs.writeFile(filePath, patchedContent as string);
+
+        return '[PatchTool] Succesfully patched file';
+      } catch (err) {
+        logger.error(
+          `[PatchTool] Error: Failed to patch file on ${filePath}: ${err.message}`,
+        );
+      }
     } catch (err) {
-      logger.error(`Failed to patch file on ${filePath}: ${err.message}`);
+      logger.error(
+        `[PatchTool} Error: Failed to access file on ${filePath}: ${err.message}`,
+      );
     }
   }
 }
