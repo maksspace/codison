@@ -58,7 +58,7 @@ export class OpenAIProvider implements Provider {
       );
 
       const stream = await this.openai.responses.create({
-        model: 'gpt-4.1-mini',
+        model: 'gpt-4.1',
         instructions: !options.previousResponseId ? SYSTEM_PROMPT : undefined,
         previous_response_id: options.previousResponseId,
         input,

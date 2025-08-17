@@ -7,6 +7,7 @@ import { availableTools } from '@/tools';
 
 export interface CodisonOptions {
   instructions?: string;
+  workingDir?: string;
 }
 
 export interface CodisonRunOptions {
@@ -44,7 +45,7 @@ export class Codison {
     });
   }
 
-  async run(options: CodisonRunOptions) {
+  async runNonInteractive(options: CodisonRunOptions) {
     if (this.instructions) {
       this.history.addMessage({
         role: 'user',
@@ -65,5 +66,9 @@ export class Codison {
     }
 
     return textResponse.content;
+  }
+
+  async run(options: CodisonRunOptions) {
+    return this.agent.run(options);
   }
 }

@@ -6,24 +6,21 @@ import { logger } from '@/logger';
 export class ReadTool implements Tool {
   name = 'read';
   description =
-    'Reads the content of a file from the filesystem. Can read a specific portion of the file using offset and limit parameters.';
+    'Reads a file. Optionally returns a slice by line offset and limit';
   schema = {
     type: 'object',
     properties: {
       path: {
         type: 'string',
-        description:
-          'The absolute file system path to the file. This path must start from the root (e.g., C:\\Users\\... or /home/user/...).',
+        description: 'Absolute path to the file',
       },
       offset: {
         type: 'number',
-        description:
-          'The starting line number to read from. Defaults to 0, which is the first line.',
+        description: 'Start line (0-based). Default: 0',
       },
       limit: {
         type: 'number',
-        description:
-          'The maximum number of lines to read from the offset. Defaults to 500 lines.',
+        description: 'Max lines to return. Default: 500',
       },
     },
     required: ['path', 'offset', 'limit'],

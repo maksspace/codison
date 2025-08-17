@@ -71,7 +71,7 @@ export class GeminiProvider implements Provider {
       }
 
       const stream = await this.genAI.models.generateContentStream({
-        model: 'gemini-2.0-flash-001',
+        model: 'gemini-2.5-pro',
         contents: content,
         config: {
           tools: [{ functionDeclarations: this.tools }],
