@@ -11,7 +11,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node -r tsconfig-paths/register ./src/index.ts",
+    "dev": "tsx -r tsconfig-paths/register ./src/index.ts",
     "ai-review": "ts-node -r tsconfig-paths/register ./src/cli/index.ts",
     "build": "tsc",
     "lint": "eslint ./src/**/*.{ts,tsx}",
@@ -51,10 +51,12 @@
     "dotenv": "^17.2.1",
     "ignore": "^7.0.5",
     "jsdom": "^26.1.0",
+    "node-lame": "^1.4.0",
     "openai": "^5.10.2",
     "pino": "9.3.2",
     "playwright": "^1.54.1",
     "rxjs": "7.8.1",
+    "tsx": "^4.20.4",
     "uuid": "^11.1.0",
     "zod": "^4.0.17"
   }

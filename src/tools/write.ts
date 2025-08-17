@@ -5,18 +5,18 @@ import { logger } from '@/logger';
 
 export class WriteTool implements Tool {
   name = 'write';
-  description = 'Writes to a specified file.';
+  description =
+    'Writes text to a file. Creates parent directories if needed and overwrites existing content.';
   schema = {
     type: 'object',
     properties: {
       path: {
         type: 'string',
-        description:
-          'The absolute file system path to the file. This path must start from the root (e.g., C:\\Users\\... or /home/user/...).',
+        description: 'Absolute path to the target file',
       },
       content: {
         type: 'string',
-        description: 'The content to write to the file',
+        description: 'Text to write',
       },
     },
     required: ['path', 'content'],

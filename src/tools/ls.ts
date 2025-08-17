@@ -6,19 +6,18 @@ import * as path from 'path';
 export class LsTool implements Tool {
   name = 'ls';
   description =
-    'Lists files and folders in a specified directory, with a specified depth for subfolders. By default, it lists the immediate contents of the directory and its direct subfolders.';
+    'Lists files and folders in the given directory. Supports optional depth to include subfolders';
   schema = {
     type: 'object',
     properties: {
       path: {
         type: 'string',
-        description:
-          'The absolute file system path to the directory. This path must start from the root (e.g., C:\\Users\\... or /home/user/...).',
+        description: 'Absolute path to the directory to list',
       },
       depth: {
         type: 'number',
         description:
-          'The maximum depth to traverse into subfolders. A depth of 0 means only list contents of the specified path. A depth of 1 means list immediate contents and the contents of their direct subfolders. Defaults to 1. Set to a higher number for deeper traversal.',
+          'How many levels of subfolders to include. 0 = only this folder. Default: 1.',
       },
     },
     required: ['path', 'depth'],

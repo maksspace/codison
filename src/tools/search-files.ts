@@ -3,7 +3,7 @@ import * as path from 'path';
 import { Tool } from './types';
 import ignore, { Ignore } from 'ignore';
 
-export class SearchTool implements Tool {
+export class SearchFilesTool implements Tool {
   name = 'searchFiles';
   description =
     'Searches for files in a given directory matching a regular expression pattern, while respecting rules specified in .gitignore. Returns a list of full file paths.';
@@ -49,7 +49,7 @@ export class SearchTool implements Tool {
       this.ignoreManager.add(fileContent);
     } catch (err) {
       console.log(
-        `[SearchTool] .gitignore not found, proceeding with defaults: ${err}`,
+        `[SearchFilesTool] .gitignore not found, proceeding with defaults: ${err}`,
       );
     }
   }
@@ -95,14 +95,14 @@ export class SearchTool implements Tool {
       }
     } catch (err) {
       throw new Error(
-        `[SearchTool ERROR] Error reading directory ${currentDir}: ${err}`,
+        `[SearchFilesTool ERROR] Error reading directory ${currentDir}: ${err}`,
       );
     }
   }
 
   async execute(args: Record<string, any>): Promise<string> {
     await this.loadIgnoreRules();
-    console.log('[SearchTool] Starting file search...');
+    console.log('[SearchFilesTool] Starting file search...');
 
     const regex = args.regex as string;
     const searchPath = args.path as string;

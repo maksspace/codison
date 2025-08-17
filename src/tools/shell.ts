@@ -5,14 +5,13 @@ import { exec } from 'child_process';
 export class ShellTool implements Tool {
   name = 'shell';
   description =
-    'Executes a shell command. Use platform-appropriate commands based on the execution context.';
+    'Runs a non-interactive shell command in the current project. Uses the OS default shell, disables pagers, and returns stdout/stderr.';
   schema = {
     type: 'object',
     properties: {
       command: {
         type: 'string',
-        description:
-          'Executes a shell command. Use this for operations that can only be done on the command line. For file reading or searching, use the dedicated "read" and "searchFiles" tools to avoid errors. Use commands appropriate for the current OS and shell environment.',
+        description: 'EShell command to run (non-interactive).',
       },
     },
     required: ['command'],
