@@ -10,26 +10,31 @@ export interface AgentOptions {
   history: History;
   tools?: Tool[];
   workingDir?: string;
+  sessionId?: string;
 }
 
 export class Agent {
   private provider: Provider;
   private history: History;
   private tools: Map<string, Tool>;
+  private sessionId: string;
 
   constructor(options: AgentOptions) {
     this.provider = options.provider;
     this.history = options.history;
     this.tools = new Map(options.tools.map((tool) => [tool.name, tool]));
+    this.sessionId = options.sessionId;
   }
 
-  public run(options: RunAgentOptions): Observable<AgentEvent> {
-    this.history.addMessage({ role: 'user', content: options.prompt });
+  public async run(options: RunAgentOptions): Promise<Observable<AgentEvent>> {
+    await this.history.addMessage({ role: 'user', content: options.prompt });
 
     return new Observable<AgentEvent>((subscriber) => {
       const step = async (): Promise<void> => {
-        const messages = this.history.getMessages();
-        const stream$ = await this.provider.stream({ messages });
+        const currentMessages = await this.history.getMessages();
+        const stream$ = await this.provider.stream({
+          messages: currentMessages,
+        });
 
         const toolCalls: ToolCallEvent[] = [];
 
@@ -100,7 +105,7 @@ export class Agent {
               name: call.name,
               output: result,
             });
-            this.history.addMessage({
+            await this.history.addMessage({
               type: 'toolCallOutput',
               name: call.name,
               callId: call.callId,
