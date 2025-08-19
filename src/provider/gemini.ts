@@ -5,7 +5,13 @@ import { Observable } from 'rxjs';
 import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
-import { Provider, ProviderEvent, StreamOptions } from './provider';
+import {
+  PRICING_MODEL,
+  Provider,
+  ProviderEvent,
+  StreamOptions,
+  Usage,
+} from './provider';
 import { Tool } from '@/tools';
 
 export interface CreateGeminiProviderOptions {
@@ -83,6 +89,8 @@ export class GeminiProvider implements Provider {
         let cancelled = false;
         let fullText = '';
         let responseId: string;
+        let totalInputTokens = 0;
+        let totalOutputTokens = 0;
 
         (async () => {
           try {
@@ -94,6 +102,12 @@ export class GeminiProvider implements Provider {
               if (!responseId) {
                 responseId = chunk.responseId;
                 observer.next({ type: 'startText', id: responseId });
+              }
+
+              if (chunk.usageMetadata) {
+                totalInputTokens += chunk.usageMetadata.promptTokenCount || 0;
+                totalOutputTokens +=
+                  chunk.usageMetadata.candidatesTokenCount || 0;
               }
 
               const candidate = chunk.candidates?.[0];
@@ -128,9 +142,28 @@ export class GeminiProvider implements Provider {
                 }
               }
             }
+
+            const totalTokens = totalInputTokens + totalOutputTokens;
+            const modelPricing = PRICING_MODEL['gemini-2.0-flash-001'];
+            const cost =
+              (totalInputTokens / 1000) * modelPricing.promptPerThousandTokens +
+              (totalOutputTokens / 1000) *
+                modelPricing.completionPerThousandTokens;
+
+            const usage: Usage = {
+              inputTokens: totalInputTokens,
+              outputTokens: totalOutputTokens,
+              totalTokens: totalTokens,
+              cost: cost,
+            };
+
             if (fullText) {
               observer.next({ type: 'fullText', content: fullText });
-              observer.next({ type: 'endText', id: responseId });
+              observer.next({
+                type: 'endText',
+                id: responseId,
+                usage: { ...usage },
+              });
             }
             observer.complete();
           } catch (err) {

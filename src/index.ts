@@ -27,6 +27,8 @@ async function main() {
   //   tools: availableTools,
   // });
   const history = new History();
+  await history.init();
+
   const agent = new Agent({ provider, history, tools: availableTools });
   const channel = new Channel(agent);
   const outputHandler = new ConsoleOutputHandler(channel);
@@ -50,14 +52,7 @@ async function main() {
         keepRunning = false;
         logger.info('Exiting AI Agent CLI. Goodbye!');
 
-        // const sessionTotals = history.getOverallSessionTokenUsage();
-        // logger.info('\n[TokenUsage] Session:');
-        // logger.info(`  Prompt Tokens: ${sessionTotals.promptTokens}`);
-        // logger.info(`  Completion Tokens: ${sessionTotals.completionTokens}`);
-        // logger.info(`  Total Tokens: ${sessionTotals.totalTokens}`);
-        // logger.info(`  Total Cost (USD): $${sessionTotals.costUSD.toFixed(6)}`);
-
-        history.clear();
+        await history.clear();
 
         break;
       }

@@ -18,6 +18,7 @@ export interface FullTextEvent {
 export interface EndTextEvent {
   type: 'endText';
   id: string;
+  usage?: Usage;
 }
 
 export interface StartToolEvent {
@@ -41,6 +42,14 @@ export interface ToolCallEvent {
 export interface EndToolEvent {
   type: 'endTool';
   callId: string;
+  usage?: Usage;
+}
+
+export interface Usage {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cost: number;
 }
 
 export type ProviderEvent =
@@ -91,3 +100,14 @@ export interface StreamOptions {
 export interface Provider {
   stream(options: StreamOptions): Promise<Observable<ProviderEvent>>;
 }
+
+export const PRICING_MODEL = {
+  'gpt-4.1-mini': {
+    promptPerThousandTokens: 0.0001,
+    completionPerThousandTokens: 0.0003,
+  },
+  'gemini-2.0-flash-001': {
+    promptPerThousandTokens: 0.00005,
+    completionPerThousandTokens: 0.00015,
+  },
+};

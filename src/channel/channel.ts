@@ -14,10 +14,11 @@ export class Channel {
   constructor(private agent: Agent) {
     this.output$ = this.outputSubject.asObservable();
     this.inputSub = this.input$.subscribe((input) => {
-      const run$ = this.agent.run(input);
-      this.runSub = run$.subscribe({
-        next: (event) => this.outputSubject.next(event),
-        error: (err) => this.outputSubject.error(err),
+      this.agent.run(input).then((run$) => {
+        this.runSub = run$.subscribe({
+          next: (event) => this.outputSubject.next(event),
+          error: (err) => this.outputSubject.error(err),
+        });
       });
     });
   }

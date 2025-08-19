@@ -8,7 +8,13 @@ import {
 import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
-import { ProviderEvent, Provider, StreamOptions } from './provider';
+import {
+  ProviderEvent,
+  Provider,
+  StreamOptions,
+  PRICING_MODEL,
+  Usage,
+} from './provider';
 import { Tool } from '@/tools';
 
 export interface CreateOpenAIProviderOptions {
@@ -68,6 +74,8 @@ export class OpenAIProvider implements Provider {
 
       const output = new Observable<ProviderEvent>((observer) => {
         let cancelled = false;
+        let responseId: string;
+        let usageData: Usage;
 
         (async () => {
           try {
@@ -78,6 +86,7 @@ export class OpenAIProvider implements Provider {
 
               switch (event.type) {
                 case 'response.created':
+                  responseId = event.response.id;
                   observer.next({ type: 'startText', id: event.response.id });
                   break;
                 case 'response.output_text.delta':
@@ -85,7 +94,6 @@ export class OpenAIProvider implements Provider {
                   break;
                 case 'response.output_text.done':
                   observer.next({ type: 'fullText', content: event.text });
-                  observer.next({ type: 'endText', id: event.item_id });
                   break;
                 case 'response.output_item.added':
                   if (event.item.type === 'function_call') {
@@ -117,9 +125,40 @@ export class OpenAIProvider implements Provider {
                   }
 
                   break;
+                case 'response.completed': {
+                  const inputTokens = event.response.usage.input_tokens;
+                  const outputTokens = event.response.usage.output_tokens;
+                  const totalTokens = event.response.usage.total_tokens;
+                  const modelPricing = PRICING_MODEL['gpt-4.1-mini'];
+                  const cost =
+                    (inputTokens / 1000) *
+                      modelPricing.promptPerThousandTokens +
+                    (outputTokens / 1000) *
+                      modelPricing.completionPerThousandTokens;
+
+                  usageData = {
+                    inputTokens,
+                    outputTokens,
+                    totalTokens,
+                    cost,
+                  };
+                  break;
+                }
               }
             }
 
+            if (responseId) {
+              const endEvent: ProviderEvent = {
+                type: 'endText',
+                id: responseId,
+              };
+
+              if (usageData) {
+                endEvent.usage = usageData;
+              }
+
+              observer.next(endEvent);
+            }
             observer.complete();
           } catch (err) {
             observer.error(err);
