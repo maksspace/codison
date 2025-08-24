@@ -1,4 +1,5 @@
 import { Subscription } from 'rxjs';
+import chalk from 'chalk';
 
 import { AgentEvent } from '@/agent/types';
 import { Channel } from '@/channel/channel';
@@ -6,6 +7,7 @@ import { OutputHandler } from './output-handler';
 
 export class ConsoleOutputHandler implements OutputHandler {
   private sub: Subscription;
+  private endOfTurn = true;
 
   constructor(channel: Channel) {
     this.sub = channel.output$.subscribe({
@@ -18,9 +20,21 @@ export class ConsoleOutputHandler implements OutputHandler {
   handle(event: AgentEvent): void {
     switch (event.type) {
       case 'partialText': {
-        process.stdout.write(event.content);
+        if (this.endOfTurn) {
+          this.endOfTurn = false;
+          process.stdout.write(chalk.yellow('\nAgent: '));
+        }
+
+        process.stdout.write(chalk.gray(event.content));
+        this.endOfTurn = false;
         break;
       }
+
+      case 'fullText':
+        if (!this.endOfTurn) {
+          this.endOfTurn = true;
+        }
+        break;
 
       case 'startTool': {
         process.stdout.write(`\n[Start Tool ${event.callId}]\n`);

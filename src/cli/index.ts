@@ -1,19 +1,65 @@
 import 'dotenv/config';
+import * as readline from 'readline/promises';
+import chalk from 'chalk';
+import { program } from 'commander';
 
 import { Codison } from '@/codison';
-import { AI_CODE_REVIEW_INSTRUCTIONS } from '@/instructions';
+import { stdin, stdout } from 'process';
+import { logger } from '@/logger';
+import { ConsoleOutputHandler } from '@/output/console';
+import * as fs from 'node:fs';
+import * as path from 'path';
 
 async function main() {
-  const codison = new Codison({
-    instructions: AI_CODE_REVIEW_INSTRUCTIONS,
+  program.option('-i, --instruction <string>');
+  program.parse();
+
+  const { instruction } = program.opts();
+  let instructionStr;
+
+  if (instruction) {
+    try {
+      const filePath = path.resolve(
+        '.codison/instructions',
+        instruction + '.md',
+      );
+      instructionStr = fs.readFileSync(filePath, 'utf8');
+    } catch (e) {
+      throw new Error(`instruction ${instruction} not found.`);
+    }
+  }
+
+  const rl = readline.createInterface({
+    input: stdin,
+    output: stdout,
   });
 
-  const resonse = await codison.run({
-    prompt:
-      'Review commits in the current branch agains main. only include commits written by stefanprvulovic - junior dev with 4 months of experience.',
-  });
+  const codison = new Codison({ instructions: instructionStr });
+  const channel = codison.getOutputChannel();
+  const outputHandler = new ConsoleOutputHandler(channel);
 
-  console.log(resonse);
+  let keepRunning = true;
+  while (keepRunning) {
+    try {
+      const prompt = await rl.question(chalk.green('You: '));
+
+      if (!prompt.trim()) {
+        continue;
+      }
+
+      if (prompt.toLowerCase() === 'exit' || prompt.toLowerCase() === 'quit') {
+        keepRunning = false;
+        break;
+      }
+
+      channel.input$.next({ prompt });
+    } catch (error) {
+      logger.error('An error occurred during interaction:', error);
+    }
+  }
+
+  rl.close();
+  outputHandler.stop();
 }
 
 main().catch(console.error);

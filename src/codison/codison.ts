@@ -4,6 +4,7 @@ import { Agent } from '@/agent';
 import { History } from '@/history';
 import { OpenAIProvider, GeminiProvider, Provider } from '@/provider';
 import { availableTools } from '@/tools';
+import { Channel } from '@/channel/channel';
 
 export interface CodisonOptions {
   instructions?: string;
@@ -17,7 +18,7 @@ export interface CodisonRunOptions {
 export class Codison {
   private readonly agent: Agent;
   private readonly history: History;
-  protected readonly instructions?: string;
+  private readonly channel: Channel;
 
   constructor(options?: CodisonOptions) {
     let provider: Provider;
@@ -36,23 +37,25 @@ export class Codison {
       throw new Error('Model api key not found in env.');
     }
 
-    this.instructions = options?.instructions;
     this.history = new History();
+
     this.agent = new Agent({
       provider,
       history: this.history,
       tools: availableTools,
     });
+
+    this.channel = new Channel(this.agent);
+
+    if (options.instructions) {
+      this.history.addMessage({
+        role: 'user',
+        content: options.instructions,
+      });
+    }
   }
 
   async runNonInteractive(options: CodisonRunOptions) {
-    if (this.instructions) {
-      this.history.addMessage({
-        role: 'user',
-        content: this.instructions,
-      });
-    }
-
     const events = this.agent.run({
       prompt: options.prompt,
     });
@@ -68,7 +71,11 @@ export class Codison {
     return textResponse.content;
   }
 
-  async run(options: CodisonRunOptions) {
+  run(options: CodisonRunOptions) {
     return this.agent.run(options);
+  }
+
+  getOutputChannel() {
+    return this.channel;
   }
 }
