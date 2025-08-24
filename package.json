@@ -1,9 +1,8 @@
 {
   "name": "codison",
   "productName": "codison",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "codison",
-  "main": ".webpack/main",
   "keywords": [],
   "author": {
     "name": "Maksim Smagin",
@@ -19,6 +18,7 @@
   },
   "bin": "./dist/cli/index.js",
   "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "files": [
     "./dist"
   ],
