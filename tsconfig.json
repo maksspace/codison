@@ -14,6 +14,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "types": ["node"],
+    "declaration": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": ["./src/*"]
