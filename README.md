@@ -13,24 +13,6 @@ Codison is an autonomous AI CLI agent that acts as a senior software developer o
 - **Minimal Talk:** Outputs concise, CLI-like responses. No unnecessary explanations.
 - **Memory System:** Remembers established facts about your code, conventions, and commands for future sessions.
 
-## How to Use
-1. **Start Codison** in your project’s root directory.
-2. **Give Tasks** via natural language (e.g., `fix bug in auth.js`, `add tests`, `update API docs`).
-3. **Codison Acts**: Reads, edits, runs tools, proposes commits — always based on your actual code and conventions.
-4. **Review & Commit**: Confirm commits and pushes when prompted.
-
-## Example Commands
-```bash
-# List files in a directory
-list files in src
-
-# Fix a bug
-fix bug in auth.py
-
-# Add a new feature
-generate api handler for createUser
-```
-
 ## Requirements
 - Node.js 18+
 - Internet connection (for Codison’s AI)
@@ -41,7 +23,7 @@ Codison can also be used as a library:
 ```js
 import { Codison } from 'codison';
 
-const codison = new Codison({ projectDir: '/your/project/path' });
+const codison = new Codison();
 codison.runNonInteractive('fix bug in auth.js');
 ```
 
