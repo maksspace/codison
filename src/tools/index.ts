@@ -11,6 +11,9 @@ import { GetDependenciesTool } from './get-dependencies';
 import { ReadManyTool } from './read-many';
 import { MemoryTool } from './memory';
 
+import { ReadSheetsNamesTool } from './excel/read-sheets-names';
+import { ReadSheetTool } from './excel/read-sheet';
+
 export const availableTools: Tool[] = [
   new ShellTool(),
   new WriteTool(),
@@ -22,6 +25,8 @@ export const availableTools: Tool[] = [
   new GetProjectInfoTool(),
   new ReadManyTool(),
   new MemoryTool(),
+  new ReadSheetsNamesTool(),
+  new ReadSheetTool(),
 ];
 
 export { Tool };

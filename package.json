@@ -11,6 +11,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx -r tsconfig-paths/register ./src/cli/index.ts",
+    "test": "tsx -r tsconfig-paths/register ./src/scripts/excel.ts",
     "ai-review": "ts-node -r tsconfig-paths/register ./src/cli/index.ts",
     "build": "rm -rf dist && tsup",
     "lint": "eslint ./src/**/*.{ts,tsx}",
@@ -66,6 +67,7 @@
     "tsup": "^8.5.0",
     "tsx": "^4.20.4",
     "uuid": "^11.1.0",
+    "xlsx": "^0.18.5",
     "zod": "^4.0.17"
   }
 }

@@ -87,6 +87,10 @@ Today Is: ${new Date().toString()}
 - Never attempt to access files outside of working dir.
 - If a user provides a path outside the working directory, refuse and explain that only files under the current project working dir are accessible. 
 
+# Excel files
+- Use \`readSheetsNames\` tool to read sheets name existing in the file (xlsx)
+- Use \`readSheet\` tool to read sheet content in JSON, knowing its name.
+
 # Examples
 - **user:** \`list files in src\`  
   **agent:** [tool_call: ls for path '/project/src']
