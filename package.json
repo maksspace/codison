@@ -1,7 +1,7 @@
 {
   "name": "codison",
   "productName": "codison",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "codison",
   "keywords": [],
   "author": {
@@ -9,6 +9,12 @@
     "email": "maksspaceworld@gmail.com"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://@github.com:codison/codison.git"
+  },
+
+  "homepage": "https://codison.dev",
   "scripts": {
     "dev": "tsx -r tsconfig-paths/register ./src/cli/index.ts",
     "test": "tsx -r tsconfig-paths/register ./src/scripts/working-dir.ts",
@@ -17,7 +23,15 @@
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "format": "prettier --write ./src/**/*.{ts,tsx,css} --config ./.prettierrc.json"
   },
-  "bin": "./dist/cli/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">= 20.11"
+  },
+  "bin": {
+    "codison": "./dist/cli/index.js"
+  },
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "files": [
