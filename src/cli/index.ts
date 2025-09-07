@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import 'dotenv/config';
-import * as readline from 'readline/promises';
+import * as readline from 'readline';
 import chalk from 'chalk';
 import { program } from 'commander';
 import * as fs from 'node:fs';
@@ -45,7 +45,7 @@ async function main() {
   const channel = codison.getOutputChannel();
   const outputHandler = new ConsoleOutputHandler(channel);
 
-  const rl = readline.createInterface({
+  const rl = readline.promises.createInterface({
     input: stdin,
     output: stdout,
   });
