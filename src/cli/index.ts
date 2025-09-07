@@ -12,9 +12,11 @@ import { ConsoleOutputHandler } from '@/output/console';
 
 async function main() {
   program.option('-i, --instruction <string>');
+  program.option('-w, --workingDir <string>');
+  program.argument('[string]');
   program.parse();
 
-  const { instruction } = program.opts();
+  const { instruction, workingDir } = program.opts();
   let instructionStr;
 
   if (instruction) {
@@ -29,14 +31,22 @@ async function main() {
     }
   }
 
+  const codison = new Codison({ instructions: instructionStr, workingDir });
+
+  const strPrompt = program.args.length > 0 ? program.args[0] : '';
+  if (strPrompt) {
+    const result = await codison.run({ prompt: strPrompt });
+    process.stdout.write(result);
+    return;
+  }
+
+  const channel = codison.getOutputChannel();
+  const outputHandler = new ConsoleOutputHandler(channel);
+
   const rl = readline.createInterface({
     input: stdin,
     output: stdout,
   });
-
-  const codison = new Codison({ instructions: instructionStr });
-  const channel = codison.getOutputChannel();
-  const outputHandler = new ConsoleOutputHandler(channel);
 
   let keepRunning = true;
   while (keepRunning) {
