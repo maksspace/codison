@@ -2,13 +2,13 @@ import 'dotenv/config';
 import * as readline from 'readline/promises';
 import chalk from 'chalk';
 import { program } from 'commander';
+import * as fs from 'node:fs';
+import * as path from 'path';
 
 import { Codison } from '@/codison';
 import { stdin, stdout } from 'process';
 import { logger } from '@/logger';
 import { ConsoleOutputHandler } from '@/output/console';
-import * as fs from 'node:fs';
-import * as path from 'path';
 
 async function main() {
   program.option('-i, --instruction <string>');
@@ -41,9 +41,10 @@ async function main() {
   let keepRunning = true;
   while (keepRunning) {
     try {
-      const prompt = await rl.question(chalk.green('You: '));
+      const promptInput = await rl.question(chalk.green('You: '));
+      const prompt = promptInput.trim();
 
-      if (!prompt.trim()) {
+      if (!prompt.length) {
         continue;
       }
 

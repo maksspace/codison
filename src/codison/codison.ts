@@ -21,24 +21,9 @@ export class Codison {
   private readonly channel: Channel;
 
   constructor(options?: CodisonOptions) {
-    let provider: Provider;
-
-    if (process.env['OPENAI_API_KEY']) {
-      provider = new OpenAIProvider({
-        apiKey: process.env['OPENAI_API_KEY'],
-        tools: availableTools,
-      });
-    } else if (process.env['GEMINI_API_KEY']) {
-      provider = new GeminiProvider({
-        apiKey: process.env['GEMINI_API_KEY'],
-        tools: availableTools,
-      });
-    } else {
-      throw new Error('Model api key not found in env.');
-    }
-
     this.history = new History();
 
+    const provider = this.createProvider();
     this.agent = new Agent({
       provider,
       history: this.history,
@@ -55,7 +40,27 @@ export class Codison {
     }
   }
 
-  async runNonInteractive(options: CodisonRunOptions) {
+  private createProvider() {
+    let provider: Provider;
+
+    if (process.env['OPENAI_API_KEY']) {
+      provider = new OpenAIProvider({
+        apiKey: process.env['OPENAI_API_KEY'],
+        tools: availableTools,
+      });
+    } else if (process.env['GEMINI_API_KEY']) {
+      provider = new GeminiProvider({
+        apiKey: process.env['GEMINI_API_KEY'],
+        tools: availableTools,
+      });
+    } else {
+      throw new Error('Model api key not found in env.');
+    }
+
+    return provider;
+  }
+
+  async run(options: CodisonRunOptions) {
     const events = this.agent.run({
       prompt: options.prompt,
     });
@@ -71,7 +76,7 @@ export class Codison {
     return textResponse.content;
   }
 
-  run(options: CodisonRunOptions) {
+  runInteractive(options: CodisonRunOptions) {
     return this.agent.run(options);
   }
 
