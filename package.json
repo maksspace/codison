@@ -1,7 +1,7 @@
 {
   "name": "codison",
   "productName": "codison",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "codison",
   "keywords": [],
   "author": {
@@ -11,7 +11,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx -r tsconfig-paths/register ./src/cli/index.ts",
-    "test": "tsx -r tsconfig-paths/register ./src/scripts/excel.ts",
+    "test": "tsx -r tsconfig-paths/register ./src/scripts/working-dir.ts",
     "ai-review": "ts-node -r tsconfig-paths/register ./src/cli/index.ts",
     "build": "rm -rf dist && tsup",
     "lint": "eslint ./src/**/*.{ts,tsx}",

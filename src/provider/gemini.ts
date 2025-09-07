@@ -2,7 +2,6 @@ import { Content, FunctionDeclaration, GoogleGenAI, Part } from '@google/genai';
 import { v4 as uuid } from 'uuid';
 import { Observable } from 'rxjs';
 
-import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
 import { Provider, ProviderEvent, StreamOptions } from './provider';
@@ -11,14 +10,17 @@ import { Tool } from '@/tools';
 export interface CreateGeminiProviderOptions {
   apiKey: string;
   tools: Tool[];
+  systemPrompt: string;
 }
 
 export class GeminiProvider implements Provider {
   private genAI: GoogleGenAI;
   private tools: FunctionDeclaration[];
+  private systemPrompt: string;
 
   constructor(options: CreateGeminiProviderOptions) {
     this.genAI = new GoogleGenAI({ apiKey: options.apiKey });
+    this.systemPrompt = options.systemPrompt;
     this.tools = options.tools?.map((tool) => ({
       name: tool.name,
       description: tool.description,
@@ -75,7 +77,7 @@ export class GeminiProvider implements Provider {
         contents: content,
         config: {
           tools: [{ functionDeclarations: this.tools }],
-          systemInstruction: SYSTEM_PROMPT,
+          systemInstruction: this.systemPrompt,
         },
       });
 

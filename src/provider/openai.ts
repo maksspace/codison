@@ -5,7 +5,6 @@ import {
   ResponseCreateParams,
 } from 'openai/resources/responses/responses';
 
-import { SYSTEM_PROMPT } from '@/prompt';
 import { logger } from '@/logger';
 
 import { ProviderEvent, Provider, StreamOptions } from './provider';
@@ -14,14 +13,17 @@ import { Tool } from '@/tools';
 export interface CreateOpenAIProviderOptions {
   apiKey: string;
   tools: Tool[];
+  systemPrompt: string;
 }
 
 export class OpenAIProvider implements Provider {
   private openai: OpenAI;
   private tools: FunctionTool[];
+  private systemPrompt: string;
 
   constructor(options: CreateOpenAIProviderOptions) {
     this.openai = new OpenAI({ apiKey: options.apiKey });
+    this.systemPrompt = options.systemPrompt;
     this.tools = options.tools?.map((tool) => ({
       type: 'function',
       name: tool.name,
@@ -59,7 +61,9 @@ export class OpenAIProvider implements Provider {
 
       const stream = await this.openai.responses.create({
         model: 'gpt-4.1',
-        instructions: !options.previousResponseId ? SYSTEM_PROMPT : undefined,
+        instructions: !options.previousResponseId
+          ? this.systemPrompt
+          : undefined,
         previous_response_id: options.previousResponseId,
         input,
         tools: this.tools,

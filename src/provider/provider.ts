@@ -74,7 +74,7 @@ export interface ToolCallOutputMessage {
   type: 'toolCallOutput';
   callId: string;
   output: string;
-  name?: string; // added because of genAI
+  name?: string;
 }
 
 export type ProviderMessage =
