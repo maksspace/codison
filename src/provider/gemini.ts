@@ -4,7 +4,12 @@ import { Observable } from 'rxjs';
 
 import { logger } from '@/logger';
 
-import { Provider, ProviderEvent, StreamOptions } from './provider';
+import {
+  Provider,
+  ProviderEvent,
+  CreateResponseStreamOptions,
+  CreateResponseOptions,
+} from './provider';
 import { Tool } from '@/tools';
 
 export interface CreateGeminiProviderOptions {
@@ -28,7 +33,7 @@ export class GeminiProvider implements Provider {
     }));
   }
 
-  async stream(options: StreamOptions) {
+  async createResponseStream(options: CreateResponseStreamOptions) {
     try {
       const content: Content[] = [];
       let prevMessage: Content;
@@ -152,5 +157,12 @@ export class GeminiProvider implements Provider {
         `Failed to generate response from Google GenAI: ${error}`,
       );
     }
+  }
+
+  async createResponse(
+    options: CreateResponseOptions,
+  ): Promise<unknown | null> {
+    console.log(options);
+    return Promise.resolve(null);
   }
 }

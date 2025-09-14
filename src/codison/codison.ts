@@ -3,17 +3,23 @@ import { filter, lastValueFrom } from 'rxjs';
 import { Agent } from '@/agent';
 import { History } from '@/history';
 import { OpenAIProvider, GeminiProvider, Provider } from '@/provider';
-import { availableTools } from '@/tools';
+import { availableTools, Tool } from '@/tools';
 import { Channel } from '@/channel/channel';
 import { SYSTEM_PROMPT } from '@/prompt';
 
 export interface CodisonOptions {
   instructions?: string;
   workingDir?: string;
+  tools?: Tool[];
 }
 
-export interface CodisonRunOptions {
+export interface CodisonRunInteractiveOptions {
   prompt: string;
+}
+
+export interface CodisonRunNonInteractiveOptions {
+  prompt: string;
+  schema?: unknown;
 }
 
 export class Codison {
@@ -21,16 +27,21 @@ export class Codison {
   private readonly agent: Agent;
   private readonly history: History;
   private readonly channel: Channel;
+  private readonly provider: Provider;
 
-  constructor(options?: CodisonOptions) {
+  constructor(options: CodisonOptions = {}) {
     this.workingDir = options.workingDir || process.cwd();
     this.history = new History();
 
-    const provider = this.createProvider();
+    const tools = options.tools
+      ? [...availableTools, ...options.tools]
+      : availableTools;
+
+    this.provider = this.createProvider(tools);
     this.agent = new Agent({
-      provider,
+      provider: this.provider,
       history: this.history,
-      tools: availableTools,
+      tools,
       workingDir: options.workingDir,
     });
 
@@ -44,19 +55,19 @@ export class Codison {
     }
   }
 
-  private createProvider() {
+  private createProvider(tools: Tool[]) {
     let provider: Provider;
 
     if (process.env['OPENAI_API_KEY']) {
       provider = new OpenAIProvider({
         apiKey: process.env['OPENAI_API_KEY'],
-        tools: availableTools,
+        tools,
         systemPrompt: SYSTEM_PROMPT(this.workingDir),
       });
     } else if (process.env['GEMINI_API_KEY']) {
       provider = new GeminiProvider({
         apiKey: process.env['GEMINI_API_KEY'],
-        tools: availableTools,
+        tools,
         systemPrompt: SYSTEM_PROMPT(this.workingDir),
       });
     } else {
@@ -66,7 +77,7 @@ export class Codison {
     return provider;
   }
 
-  async run(options: CodisonRunOptions) {
+  async runNonInteractive(options: CodisonRunNonInteractiveOptions) {
     const events = this.agent.run({
       prompt: options.prompt,
     });
@@ -79,10 +90,22 @@ export class Codison {
       throw new Error('Failed to generate model response.');
     }
 
+    if (options.schema) {
+      this.history.addMessage({
+        role: 'user',
+        content: 'Reply using following schema',
+      });
+
+      return await this.provider.createResponse({
+        messages: this.history.getMessages(),
+        schema: options.schema,
+      });
+    }
+
     return textResponse.content;
   }
 
-  runInteractive(options: CodisonRunOptions) {
+  runInteractive(options: CodisonRunInteractiveOptions) {
     return this.agent.run(options);
   }
 

@@ -83,11 +83,20 @@ export type ProviderMessage =
   | ToolCallMessage
   | ToolCallOutputMessage;
 
-export interface StreamOptions {
+export interface CreateResponseStreamOptions {
   messages: ProviderMessage[];
   previousResponseId?: string;
 }
 
+export interface CreateResponseOptions {
+  messages: ProviderMessage[];
+  previousResponseId?: string;
+  schema?: unknown;
+}
+
 export interface Provider {
-  stream(options: StreamOptions): Promise<Observable<ProviderEvent>>;
+  createResponseStream(
+    options: CreateResponseStreamOptions,
+  ): Promise<Observable<ProviderEvent>>;
+  createResponse(options: CreateResponseOptions): Promise<unknown | null>;
 }

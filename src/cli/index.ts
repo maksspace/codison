@@ -37,8 +37,14 @@ async function main() {
 
   const strPrompt = program.args.length > 0 ? program.args[0] : '';
   if (strPrompt) {
-    const result = await codison.run({ prompt: strPrompt });
-    process.stdout.write(result);
+    const result = await codison.runNonInteractive({ prompt: strPrompt });
+
+    if (typeof result === 'string') {
+      process.stdout.write(result);
+    } else {
+      process.stdout.write(JSON.stringify(result, null, 2));
+    }
+
     return;
   }
 

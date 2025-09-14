@@ -3,8 +3,8 @@ import { promises as fs } from 'fs';
 import { Tool } from '@/tools';
 import { logger } from '@/logger';
 
-export class ReadSheetsNamesTool implements Tool {
-  name = 'readSheetsNames';
+export class ReadExcelMetadataTool implements Tool {
+  name = 'readExcelMetadata';
   description = 'Reads all sheet names of excel file.';
   schema = {
     type: 'object',
@@ -27,7 +27,22 @@ export class ReadSheetsNamesTool implements Tool {
 
       const book = xlsx.readFile(filePath);
 
-      return JSON.stringify(book.SheetNames, null, 2);
+      return JSON.stringify(
+        {
+          sheets: book.SheetNames.map((name) => {
+            const sheet = book.Sheets[name];
+            const range = xlsx.utils.decode_range(sheet['!ref']);
+
+            return {
+              name,
+              rows: range.e.r,
+              cols: range.e.c,
+            };
+          }),
+        },
+        null,
+        2,
+      );
     } catch (err) {
       logger.error(`Error reading sheets names ${args.path}:`, err);
       return `Error: Could not read sheets names: ${err.message}`;

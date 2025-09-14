@@ -7,7 +7,13 @@ import {
 
 import { logger } from '@/logger';
 
-import { ProviderEvent, Provider, StreamOptions } from './provider';
+import {
+  ProviderEvent,
+  Provider,
+  ProviderMessage,
+  CreateResponseOptions,
+  CreateResponseStreamOptions,
+} from './provider';
 import { Tool } from '@/tools';
 
 export interface CreateOpenAIProviderOptions {
@@ -33,32 +39,9 @@ export class OpenAIProvider implements Provider {
     }));
   }
 
-  async stream(options: StreamOptions) {
+  async createResponseStream(options: CreateResponseStreamOptions) {
     try {
-      const input: ResponseCreateParams['input'] = options.messages.map(
-        (message) => {
-          if ('role' in message) {
-            return {
-              role: message.role,
-              content: message.content,
-            };
-          } else if (message.type === 'toolCall') {
-            return {
-              type: 'function_call',
-              call_id: message.callId,
-              name: message.name,
-              arguments: JSON.stringify(message.args),
-            };
-          } else if (message.type === 'toolCallOutput') {
-            return {
-              type: 'function_call_output',
-              call_id: message.callId,
-              output: message.output,
-            };
-          }
-        },
-      );
-
+      const input = this.createInput(options.messages);
       const stream = await this.openai.responses.create({
         model: 'gpt-4.1',
         instructions: !options.previousResponseId
@@ -142,6 +125,70 @@ export class OpenAIProvider implements Provider {
       throw new Error(
         `Failed to generate response from OpenAI (Responses API): ${error}`,
       );
+    }
+  }
+
+  private createInput(
+    messages: ProviderMessage[],
+  ): ResponseCreateParams['input'] {
+    return messages.map((message) => {
+      if ('role' in message) {
+        return {
+          role: message.role,
+          content: message.content,
+        };
+      } else if (message.type === 'toolCall') {
+        return {
+          type: 'function_call',
+          call_id: message.callId,
+          name: message.name,
+          arguments: JSON.stringify(message.args),
+        };
+      } else if (message.type === 'toolCallOutput') {
+        return {
+          type: 'function_call_output',
+          call_id: message.callId,
+          output: message.output,
+        };
+      }
+    });
+  }
+
+  async createResponse(options: CreateResponseOptions): Promise<unknown> {
+    const input = this.createInput(options.messages);
+
+    if (options.schema) {
+      const response = await this.openai.responses.parse({
+        model: 'gpt-4.1',
+        instructions: !options.previousResponseId
+          ? this.systemPrompt
+          : undefined,
+        previous_response_id: options.previousResponseId,
+        input,
+        text: options.schema
+          ? {
+              format: {
+                type: 'json_schema',
+                strict: true,
+                name: 'output',
+                schema: options.schema as any,
+              },
+            }
+          : undefined,
+      });
+
+      if (options.schema) return response.output_parsed;
+    } else {
+      const response = await this.openai.responses.create({
+        model: 'gpt-4.1',
+        instructions: !options.previousResponseId
+          ? this.systemPrompt
+          : undefined,
+        previous_response_id: options.previousResponseId,
+        input,
+      });
+
+      return response.output_text;
     }
   }
 }

@@ -17,9 +17,9 @@
   "homepage": "https://codison.dev",
   "scripts": {
     "dev": "tsx -r tsconfig-paths/register ./src/cli/index.ts",
-    "test": "tsx -r tsconfig-paths/register ./src/scripts/working-dir.ts",
+    "test": "tsx -r tsconfig-paths/register ./src/scripts/excel.ts",
     "ai-review": "ts-node -r tsconfig-paths/register ./src/cli/index.ts",
-    "build": "rm -rf dist && tsup",
+    "build": "rm -rf dist && tsup --tsconfig tsconfig.build.json",
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "format": "prettier --write ./src/**/*.{ts,tsx,css} --config ./.prettierrc.json"
   },

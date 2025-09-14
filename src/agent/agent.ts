@@ -29,7 +29,7 @@ export class Agent {
     return new Observable<AgentEvent>((subscriber) => {
       const step = async (): Promise<void> => {
         const messages = this.history.getMessages();
-        const stream$ = await this.provider.stream({ messages });
+        const stream$ = await this.provider.createResponseStream({ messages });
 
         const toolCalls: ToolCallEvent[] = [];
 
