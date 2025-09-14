@@ -47,9 +47,7 @@ export class ReadExcelSheetRowsTool implements Tool {
       const rows = xlsx.utils.sheet_to_json(sheet);
 
       if (!limit) {
-        const t = JSON.stringify(rows.slice(offset), null, 2);
-        console.log({ t });
-        return t;
+        return JSON.stringify(rows.slice(offset), null, 2);
       } else {
         return JSON.stringify(rows.slice(offset, limit), null, 2);
       }
