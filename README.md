@@ -1,46 +1,40 @@
 # Codison
 
-A fast, autonomous AI **CLI** agent that acts as a senior developer inside your repo.  
-It edits code, runs tests, and follows your conventions.
+> **Codison is an open-source library for building AI-powered apps locally.**  
+> It gives you a full **agent runtime** with dozens of built-in tools, JSON schema validation, and local knowledge bases — all in a single package.
 
-> **Open source.** Built for speed, reliability, and a calm developer experience.
+Use it directly in your **TypeScript/JavaScript code** to parse files, run automations, and build AI features with validated outputs.  
+No external vector DBs. No cloud dependencies. No boilerplate.
 
-[GitHub](https://github.com/yourusername/codison) · [Quickstart](#quickstart)
+[GitHub](https://github.com/codison/codison) · [Quickstart](#quickstart)
 
 ---
 
-## Core ideas
+## Why Codison?
 
-- **Speed-first:** minimal latency, minimal chatter.
-- **Autonomous:** edits → builds → tests → verifies.
-- **Context-aware:** learns your style and architecture.
-- **Proactive verification:** runs tests/lint before claiming success.
-- **Concise output:** CLI-friendly logs, no fluff.
-- **Memory:** remembers conventions and project facts.
+- 🧩 **Agent as a library** — import it directly, compose tools, enforce schemas.
+- 📄 **Structured JSON output** — no free-form LLM text, always validated.
+- 📚 **Huge local knowledge bases** — feed 200MB Markdown and query it, no external DB.
+- ⚡ **Local-first** — minimal dependencies, no vendor lock-in.
+- 🔧 **Extensible** — add your own tools (APIs, DB lookups, file operations).
 
-## Requirements
+---
 
-- Node.js 18+
-- Internet connection (for Codison’s AI)
-
-## Install
+## Installation
 
 ```bash
-npm i -g codison
+npm i codison
 # or
-pnpm add -g codison
+yarn add codison
 # or
-yarn global add codison
+pnpm add codison
 ```
+
+---
 
 ## API Key
 
-Codison requires an API key to work with an AI provider. You can provide either:
-
-- `OPENAI_API_KEY`
-- `GEMINI_API_KEY`
-
-Set one of these environment variables before running Codison:
+Codison requires an API key for your LLM provider:
 
 ```bash
 export OPENAI_API_KEY=sk-xxxx
@@ -48,128 +42,137 @@ export OPENAI_API_KEY=sk-xxxx
 export GEMINI_API_KEY=your-gemini-key
 ```
 
-## Quickstart
+---
 
-Run a non-interactive task from your project root:
+## Quickstart (in code)
 
-```bash
-codison "Fix bug in auth middleware and add tests"
-```
-
-Codison will:
-
-1. Parse your repo and task.
-2. Edit files with minimal diff churn.
-3. Build & run tests.
-4. Verify and summarize the changes.
-
-## Library usage
-
-Use Codison programmatically in your tools/CI:
+The simplest way to see Codison in action — strict JSON output in 10 lines:
 
 ```ts
 import { Codison } from 'codison';
 
-const codison = new Codison({ projectRoot: process.cwd() });
-const result = await codison.runNonInteractive('Fix bug in auth.js');
-console.log('Result: ', result);
+const agent = new Codison({
+instructions: 'You are a math tutor.'
+});
+
+const result = await agent.runNonInteractive({
+prompt: 'What is 17*19?',
+schema: { type: 'number' },
+});
+
+console.log(result); // 323
 ```
 
-## Examples
+---
 
+## Example 1: Parse Excel → JSON
 
-### Interactive CLI
-
-```bash
-# From your project root
-codison
-
-# Then type your task when prompted
-> Refactor the auth middleware to remove duplicated logic,
-> add tests for token refresh, and update docs if needed.
-```
-
-### Non-interactive CLI
-
-```bash
-codison 'Fix flaky login E2E by stabilizing wait conditions and adding retry to token fetch'
-```
-
-### CI (GitHub Actions)
-
-```yaml
-name: codison
-
-on: [pull_request]
-
-jobs:
-  codison:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm i -g codison
-      - run: codison 'Review this PR: run tests, suggest safer diff if needed, and output summary'
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-```
-
-### Programmatic (TypeScript)
+Turn messy XLSX/CSV into validated JSON objects.  
+Codison calls your custom `searchCity` tool to resolve IDs and enforces a strict schema.
 
 ```ts
 import { Codison } from 'codison';
+import { SearchCityTool } from './tools/search-city';
+import { tourOpenAPISchema } from './schemas/tour';
 
-export async function codisonEdit(task: string, projectRoot = process.cwd()) {
-  const agent = new Codison({ projectRoot });
-  return agent.runNonInteractive(task);
+const codison = new Codison({
+workingDir: '/tmp/excel-import',
+instructions: 'Parse XLSX files and extract tours in strict JSON schema',
+tools: [new SearchCityTool()],
+});
+
+const result = await codison.runNonInteractive({
+prompt: 'Analyze uploaded Excel files and return all tours',
+schema: tourOpenAPISchema,
+});
+
+console.log(result);
+```
+
+✅ Resolves cities with your API/tool  
+✅ Normalizes & validates fields  
+✅ Returns schema-conformant JSON every time
+
+---
+
+## Example 2: Documentation FAQ Bot
+
+Codison includes a built-in **Knowledge Base** (RAG).  
+Feed it massive text files (200–300MB Markdown), and query them locally — no external DB required.
+
+```ts
+import { Codison, KnowledgeBase } from 'codison';
+import * as fs from 'fs';
+
+const docs = fs.readFileSync('./docs/faq.md', 'utf-8');
+
+// Create a knowledge base
+const kb = new KnowledgeBase(docs, { chunkSize: 2000 });
+
+const faqAgent = new Codison({
+instructions: 'You are a documentation assistant.',
+tools: [kb],
+});
+
+const answer = await faqAgent.runNonInteractive({
+prompt: 'How do I import tours from Excel?',
+});
+
+console.log(answer);
+```
+
+✅ Local embeddings + in-memory vector index  
+✅ Top-k retrieval blended into prompts  
+✅ Perfect for FAQ bots or support assistants
+
+---
+
+## Extending Codison
+
+Codison is designed for extension — write your own tools and plug them into the agent:
+
+```ts
+import { Tool } from 'codison';
+
+class SearchCityTool implements Tool {
+name = 'searchCity';
+description = 'Resolve cityId from city name.';
+schema = { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] };
+
+async execute(args: { name: string }) {
+return JSON.stringify(await searchCitiesByName(args), null, 2);
 }
-
-// Example usage
-await codisonEdit('Add input validation to /api/users and unit tests');
-```
-
-### Doc-lint example
-
-Validate and normalize descriptions in a doc-generator pipeline:
-
-```ts
-import { Codison } from 'codison';
-
-/**
- * Checks that JSDoc/annotations are in English, concise, and consistent.
- * Fixes minor issues and updates docs/tests accordingly.
- */
-export async function lintDocsWithCodison() {
-  const agent = new Codison({ projectRoot: process.cwd() });
-  const result = await agent.runNonInteractive([
-    'Scan annotations (TS/JS) for description quality: English language, tone consistency,',
-    'and naming alignment with code. Where trivial, fix typos/grammar and update docs.',
-    'Run build and tests to verify no regressions.'
-  ].join(' '));
-  return result;
 }
 ```
 
 ---
 
-## CLI options
+## CLI (optional)
 
-Codison CLI accepts both flags and positional arguments:
+Codison also ships a CLI for one-off tasks and quick debugging.
 
 ```bash
-Usage: codison [options] [task]
-
-Options:
-  -i, --instruction <string>   Provide the task/instruction file name (.codison/instructions/<name>.md)
-  -w, --workingDir <string>    Path to project root (default: current working directory)
-  -h, --help                   Display help
+npx codison "Fix bug in auth middleware and add tests"
 ```
+
+---
+
+## Use Cases
+
+- **Data ingestion** → parse chaotic Excel/CSV into structured JSON
+- **Support bots** → query docs, FAQs, or even your codebase
+- **Automation** → validate inputs, migrate data, run local AI workflows
+- **Custom AI utilities** → compose agents with your own APIs/tools
 
 ---
 
 ## Philosophy
 
-Codison aims to be a trustworthy teammate in your CLI: respectful of your workflows, explicit about changes and risks, and focused on shipping — not showmanship.
+Codison is a **developer-first agent runtime**:
+
+- Everything is **code**
+- Outputs are **structured and validated**
+- Tools & memory are **composable**
+- Runs **locally**, without ceremony or lock-in
+
+Build AI features directly in your apps — fast, simple, reliable.

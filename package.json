@@ -13,7 +13,6 @@
     "type": "git",
     "url": "git+https://@github.com:codison/codison.git"
   },
-
   "homepage": "https://codison.dev",
   "scripts": {
     "dev": "tsx -r tsconfig-paths/register ./src/cli/index.ts",
