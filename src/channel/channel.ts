@@ -23,6 +23,7 @@ export class Channel {
   }
 
   public stop(): void {
+    console.log('stopping');
     this.inputSub.unsubscribe();
     this.input$.complete();
     this.outputSubject.complete();
