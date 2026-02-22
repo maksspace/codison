@@ -20,7 +20,11 @@ export class Agent {
   constructor(options: AgentOptions) {
     this.provider = options.provider;
     this.history = options.history;
-    this.tools = new Map(options.tools.map((tool) => [tool.name, tool]));
+    this.tools = this.createToolsMap(options.tools);
+  }
+
+  public createToolsMap(tools: Tool[] = []) {
+    return new Map(tools.map((tool) => [tool.name, tool]));
   }
 
   public run(options: RunAgentOptions): Observable<AgentEvent> {
