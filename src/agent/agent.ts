@@ -20,10 +20,10 @@ export class Agent {
   constructor(options: AgentOptions) {
     this.provider = options.provider;
     this.history = options.history;
-    this.tools = this.createToolsMap(options.tools);
+    this.tools = this.creatToolsMap(options.tools);
   }
 
-  public createToolsMap(tools: Tool[] = []) {
+  public creatToolsMap(tools: Tool[] = []) {
     return new Map(tools.map((tool) => [tool.name, tool]));
   }
 
