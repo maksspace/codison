@@ -24,7 +24,7 @@ export class Agent {
   }
 
   public creatToolsMap(tools: Tool[] = []) {
-    return new Map(tools.map((tool) => [tool.name, tool]));
+    return new Map(tools.map((t) => [t.name, t]));
   }
 
   public run(options: RunAgentOptions): Observable<AgentEvent> {
