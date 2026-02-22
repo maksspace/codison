@@ -53,6 +53,8 @@ export class OpenAIProvider implements Provider {
         stream: true,
       });
 
+      console.log('calling');
+
       const output = new Observable<ProviderEvent>((observer) => {
         let cancelled = false;
 
