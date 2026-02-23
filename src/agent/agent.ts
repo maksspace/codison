@@ -31,6 +31,8 @@ export class Agent {
     console.log('run new agent query', options);
     this.history.addMessage({ role: 'user', content: options.prompt });
 
+    console.log({ options });
+
     return new Observable<AgentEvent>((subscriber) => {
       const step = async (): Promise<void> => {
         const messages = this.history.getMessages();
