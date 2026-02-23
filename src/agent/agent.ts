@@ -20,11 +20,18 @@ export class Agent {
   constructor(options: AgentOptions) {
     this.provider = options.provider;
     this.history = options.history;
-    this.tools = new Map(options.tools.map((tool) => [tool.name, tool]));
+    this.tools = this.createToolsMap(options.tools);
+  }
+
+  public createToolsMap(tools: Tool[] = []) {
+    return new Map(tools.map((t) => [t.name, t]));
   }
 
   public run(options: RunAgentOptions): Observable<AgentEvent> {
+    console.log('run new agent query', options);
     this.history.addMessage({ role: 'user', content: options.prompt });
+
+    console.log({ options });
 
     return new Observable<AgentEvent>((subscriber) => {
       const step = async (): Promise<void> => {
