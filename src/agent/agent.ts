@@ -28,6 +28,7 @@ export class Agent {
   }
 
   public run(options: RunAgentOptions): Observable<AgentEvent> {
+    console.log('run new agent query', options);
     this.history.addMessage({ role: 'user', content: options.prompt });
 
     return new Observable<AgentEvent>((subscriber) => {
